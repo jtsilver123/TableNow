@@ -1,0 +1,26 @@
+import type { Platform } from "../types";
+import { MockOpenTableAdapter } from "./mock-opentable";
+import { MockResyAdapter } from "./mock-resy";
+import type { MockScenario, PlatformAdapter } from "./types";
+
+export * from "./types";
+export { MockResyAdapter } from "./mock-resy";
+export { MockOpenTableAdapter } from "./mock-opentable";
+
+/**
+ * Adapter registry. The booking workflow resolves an adapter by platform and
+ * never imports a concrete implementation directly — that keeps the rest of
+ * the app platform-agnostic and makes real integrations a drop-in swap.
+ */
+export function getAdapter(platform: Platform, forcedScenario?: MockScenario): PlatformAdapter {
+  switch (platform) {
+    case "resy":
+      return new MockResyAdapter(forcedScenario);
+    case "opentable":
+      return new MockOpenTableAdapter(forcedScenario);
+    default: {
+      const _exhaustive: never = platform;
+      throw new Error(`Unknown platform: ${_exhaustive}`);
+    }
+  }
+}
