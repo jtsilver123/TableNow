@@ -2,6 +2,7 @@
 
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import { getAdapter } from "./adapters";
 import { resolveActivation, runBookingCheck } from "./booking-workflow";
 import {
   draftToRequestDefaults,
@@ -94,8 +95,10 @@ interface AppState {
   purchaseCredits: (credits: number, label: string) => void;
 
   // --- connections ---
-  connectAccount: (provider: Platform) => void;
+  connectAccount: (provider: Platform, accountLabel?: string) => void;
   disconnectAccount: (provider: Platform) => void;
+  /** Re-run the platform adapter's validateConnection and refresh health. */
+  checkConnection: (provider: Platform) => Promise<void>;
 
   // --- concierge ---
   sendConcierge: (text: string) => void;
@@ -398,14 +401,14 @@ export const useStore = create<AppState>()(
         get().pushToast("success", `${credits} credits added.`);
       },
 
-      connectAccount: (provider) => {
+      connectAccount: (provider, accountLabel) => {
         set((s) => ({
           connections: s.connections.map((c) =>
             c.provider === provider
               ? {
                   ...c,
                   status: "connected",
-                  account_label: s.user.email,
+                  account_label: accountLabel ?? c.account_label ?? s.user.email,
                   last_checked_at: nowIso(),
                   updated_at: nowIso(),
                 }
@@ -418,6 +421,28 @@ export const useStore = create<AppState>()(
         );
         blocked.forEach((r) => get().activateRequest(r.id));
         get().pushToast("success", `${provider === "resy" ? "Resy" : "OpenTable"} connected.`);
+      },
+
+      checkConnection: async (provider) => {
+        const adapter = getAdapter(provider);
+        const result = await adapter.validateConnection(get().user.id);
+        set((s) => ({
+          connections: s.connections.map((c) =>
+            c.provider === provider
+              ? {
+                  ...c,
+                  status: result.connected ? "connected" : "needs_reconnect",
+                  last_checked_at: nowIso(),
+                  updated_at: nowIso(),
+                }
+              : c,
+          ),
+        }));
+        const label = provider === "resy" ? "Resy" : "OpenTable";
+        get().pushToast(
+          result.connected ? "success" : "warning",
+          result.connected ? `${label} connection is healthy.` : `${label} needs to be reconnected.`,
+        );
       },
 
       disconnectAccount: (provider) => {

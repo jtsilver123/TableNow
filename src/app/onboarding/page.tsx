@@ -7,6 +7,7 @@ import { Logo } from "@/components/ui/logo";
 import { Button } from "@/components/ui/button";
 import { Input, Label, Segmented, Select } from "@/components/ui/field";
 import { CheckIcon, ConnectionIcon } from "@/components/icons";
+import { ConnectAccountModal } from "@/components/connections/connect-account-modal";
 import { cn } from "@/lib/cn";
 import { PLATFORM_LABEL } from "@/lib/status";
 import { FREE_CREDIT_COPY } from "@/lib/credits";
@@ -21,7 +22,6 @@ export default function OnboardingPage() {
   const authed = useStore((s) => s.authed);
   const user = useStore((s) => s.user);
   const connections = useStore((s) => s.connections);
-  const connectAccount = useStore((s) => s.connectAccount);
   const completeOnboarding = useStore((s) => s.completeOnboarding);
   const updateUser = useStore((s) => s.updateUser);
   const createRequest = useStore((s) => s.createRequest);
@@ -34,6 +34,7 @@ export default function OnboardingPage() {
   const [seating, setSeating] = useState<SeatingPreference>("any");
   const [notify, setNotify] = useState(true);
   const [first, setFirst] = useState({ restaurant_name: "", platform: "resy" as Platform });
+  const [connectProvider, setConnectProvider] = useState<Platform | null>(null);
 
   useEffect(() => {
     if (hydrated && !authed) router.replace("/signup");
@@ -144,7 +145,7 @@ export default function OnboardingPage() {
                         <p className="text-[12px] text-ink-400">{connected ? "Connected" : "Not connected"}</p>
                       </div>
                     </div>
-                    <Button variant={connected ? "secondary" : "primary"} size="sm" onClick={() => connectAccount(p)} disabled={connected}>
+                    <Button variant={connected ? "secondary" : "primary"} size="sm" onClick={() => setConnectProvider(p)} disabled={connected}>
                       {connected ? "Connected" : "Connect"}
                     </Button>
                   </div>
@@ -232,6 +233,8 @@ export default function OnboardingPage() {
           </Step>
         )}
       </main>
+
+      <ConnectAccountModal provider={connectProvider} onClose={() => setConnectProvider(null)} />
     </div>
   );
 }
