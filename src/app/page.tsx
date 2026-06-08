@@ -2,8 +2,10 @@ import Link from "next/link";
 import { LinkButton } from "@/components/ui/button";
 import { Leader } from "@/components/ui/leader";
 import { Logo } from "@/components/ui/logo";
-import { Tag } from "@/components/ui/pill";
+import { PlatformLogo } from "@/components/ui/platform-logo";
+import { ProductPreview } from "@/components/landing/product-preview";
 import { CREDIT_COPY } from "@/lib/credits";
+import type { Platform } from "@/lib/types";
 
 const HOW_IT_WORKS = [
   { n: "01", title: "Create your request", body: "Tell us the restaurant, party size, and the nights that work." },
@@ -13,11 +15,11 @@ const HOW_IT_WORKS = [
   { n: "05", title: "You only use a credit when we succeed", body: "No table, no charge. It's that simple." },
 ];
 
-const EXAMPLES = [
-  { name: "Don Angie", platform: "Resy", detail: "2 guests · Friday · 7:00–9:00 PM", hood: "West Village" },
-  { name: "Tatiana", platform: "Resy", detail: "2 guests · any weekday next week", hood: "Lincoln Center" },
-  { name: "Cote", platform: "OpenTable", detail: "4 guests · Saturday dinner", hood: "Flatiron" },
-  { name: "Lilia", platform: "Resy", detail: "2 guests · this weekend", hood: "Williamsburg" },
+const EXAMPLES: { name: string; platform: Platform; detail: string; hood: string }[] = [
+  { name: "Don Angie", platform: "resy", detail: "2 guests · Friday · 7:00–9:00 PM", hood: "West Village" },
+  { name: "Tatiana", platform: "resy", detail: "2 guests · any weekday next week", hood: "Lincoln Center" },
+  { name: "Cote", platform: "opentable", detail: "4 guests · Saturday dinner", hood: "Flatiron" },
+  { name: "Lilia", platform: "resy", detail: "2 guests · this weekend", hood: "Williamsburg" },
 ];
 
 export default function LandingPage() {
@@ -60,22 +62,13 @@ export default function LandingPage() {
           <p className="mt-6 text-[13px] text-ink-400">{CREDIT_COPY}</p>
         </div>
 
-        {/* Floating example request card */}
-        <div className="mx-auto -mb-12 max-w-md px-5">
-          <div className="card-surface animate-fade-up p-6">
-            <div className="flex items-center justify-between">
-              <span className="eyebrow">Auto-booking · Active</span>
-              <span className="inline-flex items-center gap-1.5 text-[11px] text-sage-600">
-                <span className="h-1.5 w-1.5 animate-pulse-soft rounded-full bg-sage-500" /> Searching
-              </span>
-            </div>
-            <h3 className="mt-3 font-serif text-2xl">Don Angie</h3>
-            <p className="text-sm text-ink-500">West Village · Resy</p>
-            <div className="mt-4">
-              <Leader label="Party" value="2 guests" />
-              <Leader label="When" value="Fri · 7:00–9:00 PM" />
-              <Leader label="Credit" value="Used only if booked" />
-            </div>
+        {/* Product preview — a look at the in-app queue */}
+        <div className="mx-auto -mb-16 max-w-5xl px-5 sm:px-8">
+          <p className="mb-4 text-center text-[12px] uppercase tracking-label text-ink-400">
+            A look inside
+          </p>
+          <div className="animate-fade-up">
+            <ProductPreview />
           </div>
         </div>
       </section>
@@ -178,7 +171,7 @@ export default function LandingPage() {
             {EXAMPLES.map((ex) => (
               <div key={ex.name} className="card-surface flex flex-col p-6 transition hover:-translate-y-0.5 hover:shadow-float">
                 <div className="mb-3 flex items-center justify-between">
-                  <Tag>{ex.platform}</Tag>
+                  <PlatformLogo platform={ex.platform} className="text-sm" />
                   <span className="h-1.5 w-1.5 animate-pulse-soft rounded-full bg-sage-500" />
                 </div>
                 <h3 className="font-serif text-2xl">{ex.name}</h3>

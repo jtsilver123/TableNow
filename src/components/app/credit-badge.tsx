@@ -27,7 +27,7 @@ export function CreditBadge() {
         </span>
       </span>
       {showFree && (
-        <span className="rounded-full bg-sage-100 px-2 py-0.5 text-[10px] font-medium text-sage-700">
+        <span className="hidden rounded-full bg-sage-100 px-2 py-0.5 text-[10px] font-medium text-sage-700 sm:inline">
           + free booking
         </span>
       )}

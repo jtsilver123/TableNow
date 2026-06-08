@@ -6,10 +6,11 @@ import { useHydrated } from "@/components/hydrated";
 import { Logo } from "@/components/ui/logo";
 import { Button } from "@/components/ui/button";
 import { Input, Label, Segmented, Select } from "@/components/ui/field";
-import { CheckIcon, ConnectionIcon } from "@/components/icons";
+import { CheckIcon } from "@/components/icons";
+import { PlatformBadge, PlatformLogo } from "@/components/ui/platform-logo";
+import { RestaurantAutocomplete } from "@/components/restaurant-autocomplete";
 import { ConnectAccountModal } from "@/components/connections/connect-account-modal";
 import { cn } from "@/lib/cn";
-import { PLATFORM_LABEL } from "@/lib/status";
 import { FREE_CREDIT_COPY } from "@/lib/credits";
 import { useStore } from "@/lib/store";
 import type { Platform, SeatingPreference } from "@/lib/types";
@@ -137,11 +138,9 @@ export default function OnboardingPage() {
                 return (
                   <div key={p} className="card-surface flex items-center justify-between p-4">
                     <div className="flex items-center gap-3">
-                      <span className="flex h-10 w-10 items-center justify-center rounded-full bg-sage-100 text-sage-600">
-                        <ConnectionIcon className="h-5 w-5" />
-                      </span>
+                      <PlatformBadge platform={p} className={cn("h-10 w-10", !connected && "opacity-60")} />
                       <div>
-                        <p className="font-medium text-ink-900">{PLATFORM_LABEL[p]}</p>
+                        <PlatformLogo platform={p} className="text-[15px]" />
                         <p className="text-[12px] text-ink-400">{connected ? "Connected" : "Not connected"}</p>
                       </div>
                     </div>
@@ -206,7 +205,13 @@ export default function OnboardingPage() {
             <div className="space-y-4">
               <div>
                 <Label htmlFor="r">Restaurant</Label>
-                <Input id="r" value={first.restaurant_name} onChange={(e) => setFirst((f) => ({ ...f, restaurant_name: e.target.value }))} placeholder="e.g. Don Angie" autoFocus />
+                <RestaurantAutocomplete
+                  id="r"
+                  value={first.restaurant_name}
+                  autoFocus
+                  onChange={(v) => setFirst((f) => ({ ...f, restaurant_name: v }))}
+                  onSelect={(entry) => setFirst((f) => ({ ...f, restaurant_name: entry.name, platform: entry.platform }))}
+                />
               </div>
               <div>
                 <Label>Platform</Label>

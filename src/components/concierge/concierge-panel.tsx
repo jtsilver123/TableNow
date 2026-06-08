@@ -4,8 +4,9 @@ import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Leader } from "@/components/ui/leader";
 import { CloseButton } from "@/components/ui/overlay";
+import { PlatformLogo } from "@/components/ui/platform-logo";
 import { ConciergeIcon, SendIcon, SparkIcon } from "@/components/icons";
-import { FLEXIBILITY_LABEL, PLATFORM_LABEL } from "@/lib/status";
+import { FLEXIBILITY_LABEL } from "@/lib/status";
 import { formatDateRange, formatPartySize, formatTimeWindow } from "@/lib/format";
 import { CREDIT_COPY } from "@/lib/credits";
 import { cn } from "@/lib/cn";
@@ -152,7 +153,7 @@ function ConfirmationCard({
       </div>
       <div className="px-4 py-2">
         <Leader label="Restaurant" value={payload.restaurant_name ?? "—"} emphasis />
-        <Leader label="Platform" value={PLATFORM_LABEL[payload.platform ?? "resy"]} />
+        <Leader label="Platform" value={<PlatformLogo platform={payload.platform ?? "resy"} className="text-[13px]" />} />
         <Leader label="Party" value={payload.party_size ? formatPartySize(payload.party_size) : "—"} />
         {payload.date_start && (
           <Leader

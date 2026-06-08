@@ -3,12 +3,9 @@
 import { useRouter } from "next/navigation";
 import { StatusPill } from "@/components/ui/pill";
 import { Button } from "@/components/ui/button";
+import { PlatformLogo } from "@/components/ui/platform-logo";
 import { PauseIcon } from "@/components/icons";
-import {
-  FLEXIBILITY_LABEL,
-  PLATFORM_LABEL,
-  REQUEST_STATUS_META,
-} from "@/lib/status";
+import { FLEXIBILITY_LABEL, REQUEST_STATUS_META } from "@/lib/status";
 import {
   formatDateRange,
   formatPartySize,
@@ -77,9 +74,13 @@ export function ReservationCard({ request }: { request: ReservationRequest }) {
           <div className="flex items-center gap-2">
             <h3 className="truncate font-serif text-xl text-ink-900">{request.restaurant_name}</h3>
           </div>
-          <p className="mt-0.5 truncate text-[13px] text-ink-400">
-            {request.neighborhood ? `${request.neighborhood} · ` : ""}
-            {request.city} · {PLATFORM_LABEL[request.platform]}
+          <p className="mt-0.5 flex items-center gap-1.5 truncate text-[13px] text-ink-400">
+            <span className="truncate">
+              {request.neighborhood ? `${request.neighborhood} · ` : ""}
+              {request.city}
+            </span>
+            <span aria-hidden>·</span>
+            <PlatformLogo platform={request.platform} className="text-[13px]" />
           </p>
         </div>
         <StatusPill status={request.status} />

@@ -6,11 +6,11 @@ import { Button } from "@/components/ui/button";
 import { CloseButton, Drawer } from "@/components/ui/overlay";
 import { Leader } from "@/components/ui/leader";
 import { StatusPill } from "@/components/ui/pill";
+import { PlatformLogo } from "@/components/ui/platform-logo";
 import { CheckIcon } from "@/components/icons";
 import {
   ATTEMPT_STATUS_LABEL,
   FLEXIBILITY_LABEL,
-  PLATFORM_LABEL,
   REQUEST_STATUS_META,
   SEATING_LABEL,
 } from "@/lib/status";
@@ -63,7 +63,11 @@ export function RequestDrawer() {
         <>
           <header className="flex items-start justify-between gap-3 border-b border-line px-6 pb-5 pt-6">
             <div className="min-w-0">
-              <p className="eyebrow mb-1.5">{PLATFORM_LABEL[request.platform]} · {request.city}</p>
+              <p className="mb-1.5 flex items-center gap-1.5 text-[11px] uppercase tracking-label text-sage-600">
+                <PlatformLogo platform={request.platform} className="text-[12px] normal-case tracking-normal" />
+                <span aria-hidden>·</span>
+                {request.city}
+              </p>
               <h2 className="truncate font-serif text-3xl text-ink-900">{request.restaurant_name}</h2>
               <div className="mt-3">
                 <StatusPill status={request.status} />
@@ -117,7 +121,7 @@ export function RequestDrawer() {
               <p className="eyebrow mb-2">Monitoring</p>
               <div className="card-surface px-4 py-2">
                 <Leader
-                  label={`${PLATFORM_LABEL[request.platform]} connection`}
+                  label={<span className="inline-flex items-center gap-1"><PlatformLogo platform={request.platform} className="text-[13px]" /> connection</span>}
                   value={
                     connection?.status === "connected" ? (
                       <span className="text-sage-600">Connected</span>

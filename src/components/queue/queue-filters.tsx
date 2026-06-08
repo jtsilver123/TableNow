@@ -35,12 +35,12 @@ export function QueueFilters({
             className="input-base pl-9"
           />
         </div>
-        <div className="flex gap-3">
+        <div className="grid grid-cols-3 gap-2 sm:flex sm:gap-3">
           <Select
             aria-label="Platform"
             value={state.platform}
             onChange={(e) => onChange({ platform: e.target.value as Platform | "all" })}
-            className="w-36"
+            className="w-full sm:w-36"
           >
             <option value="all">All platforms</option>
             <option value="resy">{PLATFORM_LABEL.resy}</option>
@@ -52,7 +52,7 @@ export function QueueFilters({
             onChange={(e) =>
               onChange({ party: e.target.value === "all" ? "all" : Number(e.target.value) })
             }
-            className="w-28"
+            className="w-full sm:w-28"
           >
             <option value="all">Any size</option>
             {[1, 2, 3, 4, 5, 6].map((n) => (
@@ -65,7 +65,7 @@ export function QueueFilters({
             aria-label="Sort"
             value={state.sort}
             onChange={(e) => onChange({ sort: e.target.value as QueueFilterState["sort"] })}
-            className="w-36"
+            className="w-full sm:w-36"
           >
             <option value="recent">Most recent</option>
             <option value="next_check">Next check</option>

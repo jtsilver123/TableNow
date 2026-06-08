@@ -6,6 +6,7 @@ import { useState } from "react";
 import { AuthShell } from "@/components/auth-shell";
 import { Button } from "@/components/ui/button";
 import { Input, Label } from "@/components/ui/field";
+import { GoogleButton } from "@/components/auth/google-button";
 import { useStore } from "@/lib/store";
 
 export default function LoginPage() {
@@ -27,7 +28,14 @@ export default function LoginPage() {
         This demo signs you into a sample account so you can explore the full experience.
       </p>
 
-      <form onSubmit={handleSubmit} className="mt-8 space-y-4">
+      <div className="mt-8">
+        <GoogleButton mode="login" />
+      </div>
+      <div className="my-5 flex items-center gap-3 text-[12px] text-ink-400">
+        <span className="h-px flex-1 bg-line" /> or <span className="h-px flex-1 bg-line" />
+      </div>
+
+      <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <Label htmlFor="email">Email</Label>
           <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} autoFocus />

@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { QueueIcon } from "@/components/icons";
+import { PlusIcon, QueueIcon } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import {
@@ -63,17 +63,19 @@ export default function QueuePage() {
 
   return (
     <div className="mx-auto max-w-3xl px-5 py-7 sm:px-8">
-      <div className="mb-6 flex items-end justify-between gap-4">
-        <div>
+      <div className="mb-6 flex items-end justify-between gap-3">
+        <div className="min-w-0">
           <p className="eyebrow mb-2">Auto-booking queue</p>
-          <h2 className="font-serif text-3xl text-ink-900">
+          <h2 className="font-serif text-2xl text-ink-900 sm:text-3xl">
             {hydrated && activeCount > 0
               ? `${activeCount} table${activeCount === 1 ? "" : "s"} on the watch`
               : "Your queue"}
           </h2>
         </div>
-        <Button onClick={() => openAddModal()} className="hidden sm:inline-flex">
-          New request
+        <Button onClick={() => openAddModal()} size="sm" className="flex-none sm:h-11 sm:px-5 sm:text-sm">
+          <PlusIcon className="h-4 w-4 sm:hidden" />
+          <span className="hidden sm:inline">New request</span>
+          <span className="sm:hidden">New</span>
         </Button>
       </div>
 

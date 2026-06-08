@@ -3,11 +3,10 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Leader } from "@/components/ui/leader";
-import { ConnectionIcon } from "@/components/icons";
+import { PlatformBadge, PlatformLogo } from "@/components/ui/platform-logo";
 import { ConnectAccountModal } from "@/components/connections/connect-account-modal";
 import { useHydrated } from "@/components/hydrated";
 import { cn } from "@/lib/cn";
-import { PLATFORM_LABEL } from "@/lib/status";
 import { formatRelative } from "@/lib/format";
 import { useStore } from "@/lib/store";
 import type { ConnectedAccount, Platform } from "@/lib/types";
@@ -92,16 +91,9 @@ function ConnectionCard({
     <div className="card-surface p-5">
       <div className="flex items-start justify-between gap-4">
         <div className="flex items-center gap-3">
-          <span
-            className={cn(
-              "flex h-11 w-11 items-center justify-center rounded-full",
-              connected ? "bg-sage-100 text-sage-600" : "bg-ivory-200 text-ink-400",
-            )}
-          >
-            <ConnectionIcon className="h-5 w-5" />
-          </span>
+          <PlatformBadge platform={provider} className={cn("h-11 w-11 text-lg", !connected && "opacity-60")} />
           <div>
-            <p className="font-medium text-ink-900">{PLATFORM_LABEL[provider]}</p>
+            <PlatformLogo platform={provider} className="text-base" />
             <p className="flex items-center gap-1.5 text-[12px]">
               <span className={cn("h-1.5 w-1.5 rounded-full", dot)} />
               <span className={statusColor}>{statusLabel}</span>

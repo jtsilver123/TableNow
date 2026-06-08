@@ -10,6 +10,12 @@
   html {
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
+    scroll-behavior: smooth;
+  }
+
+  /* Anchored sections clear the sticky header when scrolled to. */
+  [id] {
+    scroll-margin-top: 5rem;
   }
 
   body {

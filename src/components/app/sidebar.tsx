@@ -6,6 +6,7 @@ import { Logo } from "@/components/ui/logo";
 import { Button } from "@/components/ui/button";
 import { PlusIcon } from "@/components/icons";
 import { cn } from "@/lib/cn";
+import { isActivePath } from "@/lib/nav";
 import { useUi } from "@/lib/ui-store";
 import { NAV_ITEMS } from "./nav-config";
 
@@ -26,7 +27,7 @@ export function Sidebar() {
 
       <nav className="mt-7 flex flex-col gap-1">
         {NAV_ITEMS.map(({ href, label, Icon }) => {
-          const active = pathname === href;
+          const active = isActivePath(pathname, href);
           return (
             <Link
               key={href}

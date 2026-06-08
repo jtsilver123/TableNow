@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Input, Label, Segmented, Select, Textarea } from "@/components/ui/field";
+import { RestaurantAutocomplete } from "@/components/restaurant-autocomplete";
 import type {
   Flexibility,
   Platform,
@@ -61,11 +62,13 @@ export function RequestForm({
     <div className="space-y-5">
       <div>
         <Label htmlFor="restaurant">Restaurant</Label>
-        <Input
+        <RestaurantAutocomplete
           id="restaurant"
           value={value.restaurant_name}
-          onChange={(e) => onChange({ restaurant_name: e.target.value })}
-          placeholder="e.g. Don Angie"
+          onChange={(v) => onChange({ restaurant_name: v })}
+          onSelect={(entry) =>
+            onChange({ restaurant_name: entry.name, platform: entry.platform, city: entry.city })
+          }
         />
       </div>
 

@@ -6,6 +6,7 @@ import { useState } from "react";
 import { AuthShell } from "@/components/auth-shell";
 import { Button } from "@/components/ui/button";
 import { Input, Label } from "@/components/ui/field";
+import { GoogleButton } from "@/components/auth/google-button";
 import { useStore } from "@/lib/store";
 
 export default function SignupPage() {
@@ -29,7 +30,14 @@ export default function SignupPage() {
         Sign up and receive 1 free credit — enough for your first successful reservation.
       </p>
 
-      <form onSubmit={handleSubmit} className="mt-8 space-y-4">
+      <div className="mt-8">
+        <GoogleButton mode="signup" />
+      </div>
+      <div className="my-5 flex items-center gap-3 text-[12px] text-ink-400">
+        <span className="h-px flex-1 bg-line" /> or <span className="h-px flex-1 bg-line" />
+      </div>
+
+      <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <Label htmlFor="name">Name</Label>
           <Input id="name" value={name} onChange={(e) => setName(e.target.value)} placeholder="Alex Rivera" autoFocus />

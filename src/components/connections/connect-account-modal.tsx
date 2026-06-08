@@ -4,7 +4,9 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input, Label } from "@/components/ui/field";
 import { CloseButton, Modal } from "@/components/ui/overlay";
-import { CheckIcon, ConnectionIcon } from "@/components/icons";
+import { PlatformBadge } from "@/components/ui/platform-logo";
+import { LogoMark } from "@/components/ui/logo";
+import { CheckIcon } from "@/components/icons";
 import { PLATFORM_LABEL } from "@/lib/status";
 import { useStore } from "@/lib/store";
 import type { Platform } from "@/lib/types";
@@ -64,13 +66,9 @@ export function ConnectAccountModal({
         {/* Provider header — feels like an authorization screen */}
         <div className="flex flex-col items-center text-center">
           <div className="flex items-center gap-3">
-            <span className="flex h-11 w-11 items-center justify-center rounded-full bg-sage-100 text-sage-600">
-              <ConnectionIcon className="h-5 w-5" />
-            </span>
+            <LogoMark className="h-11 w-11" />
             <span className="text-ink-300">···</span>
-            <span className="flex h-11 w-11 items-center justify-center rounded-full bg-ink-900 text-[12px] font-semibold text-ivory-50">
-              {label[0]}
-            </span>
+            <PlatformBadge platform={provider} className="h-11 w-11 text-lg" />
           </div>
         </div>
 
