@@ -1,0 +1,76 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    color-scheme: light;
+  }
+
+  html {
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    @apply bg-ivory-100 text-ink-800 font-sans;
+    background-image: radial-gradient(
+      circle at 50% -10%,
+      rgba(107, 132, 89, 0.05),
+      transparent 55%
+    );
+    background-attachment: fixed;
+  }
+
+  ::selection {
+    @apply bg-sage-200 text-ink-900;
+  }
+
+  h1, h2, h3, h4 {
+    @apply font-serif text-ink-900;
+  }
+}
+
+@layer components {
+  /* Small uppercase label, like a menu section header. */
+  .eyebrow {
+    @apply text-[11px] font-medium uppercase tracking-label text-sage-600;
+  }
+
+  /* Thin divider rule. */
+  .rule {
+    @apply border-0 border-t border-line;
+  }
+
+  /* Dotted leader line — the signature menu detail. A label on the left, a
+     value on the right, joined by dots. Used for spec rows throughout. */
+  .leader {
+    @apply flex items-baseline gap-2;
+  }
+  .leader__dots {
+    @apply flex-1 self-end border-b border-dotted border-line/80 translate-y-[-3px];
+  }
+
+  .card-surface {
+    @apply rounded-2xl border border-line bg-ivory-50 shadow-card;
+  }
+
+  .input-base {
+    @apply w-full rounded-xl border border-line bg-ivory-50 px-3.5 py-2.5 text-sm text-ink-800
+      placeholder:text-ink-400 transition
+      focus:border-sage-300 focus:outline-none focus:ring-2 focus:ring-sage-200;
+  }
+
+  .focus-ring {
+    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage-300 focus-visible:ring-offset-2 focus-visible:ring-offset-ivory-100;
+  }
+}
+
+/* Hide scrollbars on horizontal chip rows but keep them scrollable. */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}

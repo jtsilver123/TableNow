@@ -1,0 +1,113 @@
+"use client";
+
+import { useMemo, useState } from "react";
+import { QueueIcon } from "@/components/icons";
+import { Button } from "@/components/ui/button";
+import { EmptyState } from "@/components/ui/empty-state";
+import {
+  QueueFilters,
+  type QueueFilterState,
+} from "@/components/queue/queue-filters";
+import { ReservationCard } from "@/components/queue/reservation-card";
+import { useHydrated } from "@/components/hydrated";
+import { useStore } from "@/lib/store";
+import { useUi } from "@/lib/ui-store";
+import type { RequestStatus } from "@/lib/types";
+
+const HIDDEN_BY_DEFAULT: RequestStatus[] = ["canceled"];
+
+export default function QueuePage() {
+  const hydrated = useHydrated();
+  const requests = useStore((s) => s.requests);
+  const openAddModal = useUi((s) => s.openAddModal);
+
+  const [filters, setFilters] = useState<QueueFilterState>({
+    search: "",
+    platform: "all",
+    status: "all",
+    party: "all",
+    sort: "recent",
+  });
+
+  const visible = useMemo(
+    () => requests.filter((r) => !HIDDEN_BY_DEFAULT.includes(r.status)),
+    [requests],
+  );
+
+  const counts = useMemo(() => {
+    const c: Partial<Record<RequestStatus | "all", number>> = { all: visible.length };
+    for (const r of visible) c[r.status] = (c[r.status] ?? 0) + 1;
+    return c;
+  }, [visible]);
+
+  const filtered = useMemo(() => {
+    let list = visible.filter((r) => {
+      if (filters.search && !r.restaurant_name.toLowerCase().includes(filters.search.toLowerCase()))
+        return false;
+      if (filters.platform !== "all" && r.platform !== filters.platform) return false;
+      if (filters.status !== "all" && r.status !== filters.status) return false;
+      if (filters.party !== "all" && r.party_size !== filters.party) return false;
+      return true;
+    });
+    list = [...list].sort((a, b) => {
+      if (filters.sort === "name") return a.restaurant_name.localeCompare(b.restaurant_name);
+      if (filters.sort === "next_check") {
+        return (a.next_check_at ?? "9").localeCompare(b.next_check_at ?? "9");
+      }
+      return b.created_at.localeCompare(a.created_at);
+    });
+    return list;
+  }, [visible, filters]);
+
+  const activeCount = counts.active ?? 0;
+
+  return (
+    <div className="mx-auto max-w-3xl px-5 py-7 sm:px-8">
+      <div className="mb-6 flex items-end justify-between gap-4">
+        <div>
+          <p className="eyebrow mb-2">Auto-booking queue</p>
+          <h2 className="font-serif text-3xl text-ink-900">
+            {hydrated && activeCount > 0
+              ? `${activeCount} table${activeCount === 1 ? "" : "s"} on the watch`
+              : "Your queue"}
+          </h2>
+        </div>
+        <Button onClick={() => openAddModal()} className="hidden sm:inline-flex">
+          New request
+        </Button>
+      </div>
+
+      <QueueFilters state={filters} onChange={(p) => setFilters((f) => ({ ...f, ...p }))} counts={counts} />
+
+      <div className="mt-6 space-y-4">
+        {!hydrated ? (
+          <SkeletonList />
+        ) : filtered.length === 0 && visible.length === 0 ? (
+          <EmptyState
+            icon={<QueueIcon className="h-6 w-6" />}
+            title="Start with the table you want most."
+            body="Create an auto-booking request and we'll watch availability and book the moment a matching table opens."
+            action={<Button onClick={() => openAddModal()}>Create your first request</Button>}
+          />
+        ) : filtered.length === 0 ? (
+          <EmptyState
+            title="No requests match these filters."
+            body="Try clearing a filter to see your full queue."
+          />
+        ) : (
+          filtered.map((r) => <ReservationCard key={r.id} request={r} />)
+        )}
+      </div>
+    </div>
+  );
+}
+
+function SkeletonList() {
+  return (
+    <>
+      {[0, 1, 2].map((i) => (
+        <div key={i} className="card-surface h-44 animate-pulse-soft" />
+      ))}
+    </>
+  );
+}
