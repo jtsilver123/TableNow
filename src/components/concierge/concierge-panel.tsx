@@ -8,17 +8,17 @@ import { PlatformLogo } from "@/components/ui/platform-logo";
 import { ConciergeIcon, SendIcon, SparkIcon } from "@/components/icons";
 import { FLEXIBILITY_LABEL } from "@/lib/status";
 import { formatDateRange, formatPartySize, formatTimeWindow } from "@/lib/format";
-import { CREDIT_COPY } from "@/lib/credits";
+import { ALERT_COPY } from "@/lib/plan";
 import { cn } from "@/lib/cn";
 import { useStore } from "@/lib/store";
 import { useUi } from "@/lib/ui-store";
 import type { ConciergeMessage, ReservationRequest } from "@/lib/types";
 
 const PROMPTS = [
-  "Book Don Angie for 2 next Friday after 7.",
+  "Watch Don Angie for 2 next Friday after 7.",
   "Try Tatiana any night next week for 2.",
-  "Make my Lilia request easier to get.",
-  "Which requests need credits?",
+  "Make my Lilia watch easier to catch.",
+  "What does my plan include?",
 ];
 
 function ConciergeBody({ onClose }: { onClose?: () => void }) {
@@ -57,8 +57,8 @@ function ConciergeBody({ onClose }: { onClose?: () => void }) {
         {messages.length === 0 ? (
           <div className="pt-2">
             <div className="rounded-2xl rounded-bl-sm border border-line bg-ivory-50 px-4 py-3 text-sm text-ink-700">
-              Tell me the table you&apos;re after and I&apos;ll turn it into an auto-booking request.
-              I can also make a request easier to get, pause requests, or check which need credits.
+              Tell me the table you&apos;re after and I&apos;ll set up a watch. I can also make a watch
+              easier to catch, pause watches, or explain your plan.
             </div>
             <div className="mt-4 space-y-2">
               {PROMPTS.map((p) => (
@@ -168,14 +168,14 @@ function ConfirmationCard({
           <Leader label="Flexibility" value={FLEXIBILITY_LABEL[payload.flexibility_level]} />
         )}
       </div>
-      <div className="border-t border-line px-4 py-2.5 text-[11px] text-ink-400">{CREDIT_COPY}</div>
+      <div className="border-t border-line px-4 py-2.5 text-[11px] text-ink-400">{ALERT_COPY}</div>
       <div className="flex gap-2 border-t border-line p-3">
         {added ? (
           <p className="flex items-center gap-1.5 px-2 text-[13px] text-sage-600">Added to your queue.</p>
         ) : (
           <>
             <Button size="sm" onClick={addToQueue} className="flex-1">
-              Add to Queue
+              Add watch
             </Button>
             <Button
               size="sm"

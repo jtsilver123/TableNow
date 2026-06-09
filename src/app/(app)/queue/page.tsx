@@ -65,11 +65,11 @@ export default function QueuePage() {
     <div className="mx-auto max-w-3xl px-5 py-7 sm:px-8">
       <div className="mb-6 flex items-end justify-between gap-3">
         <div className="min-w-0">
-          <p className="eyebrow mb-2">Auto-booking queue</p>
+          <p className="eyebrow mb-2">Your watches</p>
           <h2 className="font-serif text-2xl text-ink-900 sm:text-3xl">
             {hydrated && activeCount > 0
               ? `${activeCount} table${activeCount === 1 ? "" : "s"} on the watch`
-              : "Your queue"}
+              : "Your watches"}
           </h2>
         </div>
         <Button onClick={() => openAddModal()} size="sm" className="flex-none sm:h-11 sm:px-5 sm:text-sm">
@@ -88,8 +88,8 @@ export default function QueuePage() {
           <EmptyState
             icon={<QueueIcon className="h-6 w-6" />}
             title="Start with the table you want most."
-            body="Create an auto-booking request and we'll watch availability and book the moment a matching table opens."
-            action={<Button onClick={() => openAddModal()}>Create your first request</Button>}
+            body="Set a watch and we'll alert you the moment a matching table opens — then you book it in one tap."
+            action={<Button onClick={() => openAddModal()}>Create your first watch</Button>}
           />
         ) : filtered.length === 0 ? (
           <EmptyState

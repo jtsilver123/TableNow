@@ -22,7 +22,7 @@ import {
   formatTimeWindow,
 } from "@/lib/format";
 import { cn } from "@/lib/cn";
-import { CREDIT_COPY } from "@/lib/credits";
+import { PLATFORM_LABEL } from "@/lib/status";
 import { useStore } from "@/lib/store";
 import { useUi } from "@/lib/ui-store";
 import type { AttemptStatus, ReservationRequest } from "@/lib/types";
@@ -38,7 +38,6 @@ export function RequestDrawer() {
   const request = useStore((s) => s.requests.find((r) => r.id === id));
   const attempts = useStore((s) => s.attempts);
   const bookings = useStore((s) => s.bookings);
-  const connections = useStore((s) => s.connections);
 
   const pauseRequest = useStore((s) => s.pauseRequest);
   const resumeRequest = useStore((s) => s.resumeRequest);
@@ -53,7 +52,6 @@ export function RequestDrawer() {
     [attempts, id],
   );
   const booking = bookings.find((b) => b.reservation_request_id === id);
-  const connection = connections.find((c) => c.provider === request?.platform);
 
   const suggestions = request ? buildSuggestions(request) : [];
 
@@ -77,30 +75,43 @@ export function RequestDrawer() {
           </header>
 
           <div className="flex-1 overflow-y-auto px-6 py-5">
-            {/* Credit rule */}
-            <div className="rounded-xl border border-line bg-ivory-100 px-4 py-3 text-[13px] text-ink-600">
-              <span className="font-medium text-ink-800">Credit rule · </span>
-              {CREDIT_COPY}
-            </div>
-
-            {/* Booking result */}
-            {booking && (
-              <div className="mt-5 rounded-xl border border-sage-200 bg-sage-50 p-4">
+            {/* Found table → one-tap book */}
+            {booking ? (
+              <div className="rounded-xl border border-sage-200 bg-sage-50 p-4">
                 <div className="flex items-center gap-2">
                   <CheckIcon className="h-5 w-5 text-sage-600" />
-                  <p className="font-medium text-ink-900">Table booked</p>
+                  <p className="font-medium text-ink-900">We found a table</p>
                 </div>
                 <div className="mt-3">
-                  <Leader label="Confirmation" value={booking.confirmation_number} emphasis />
-                  <Leader label="Credit used" value={booking.credit_used ? "1 credit" : "Free booking"} />
-                  <Leader label="Booked" value={formatDateTime(booking.booked_at)} />
+                  <Leader label="Date" value={formatDateTime(booking.found_at)} />
+                  <Leader label="Found" value={formatRelative(booking.found_at)} />
                 </div>
+                <a
+                  href={booking.book_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl bg-sage-500 px-4 py-2.5 text-sm font-medium text-ivory-50 transition hover:bg-sage-600 focus-ring"
+                >
+                  Book on {PLATFORM_LABEL[booking.platform]}
+                  <svg viewBox="0 0 16 16" className="h-4 w-4" fill="none">
+                    <path d="M6 3h7v7M13 3 4 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </a>
+                <p className="mt-2 text-center text-[11px] text-ink-400">
+                  Opens {PLATFORM_LABEL[booking.platform]} so you can confirm in a tap.
+                </p>
+              </div>
+            ) : (
+              <div className="rounded-xl border border-line bg-ivory-100 px-4 py-3 text-[13px] text-ink-600">
+                <span className="font-medium text-ink-800">How this works · </span>
+                We watch availability and alert you the moment a table opens — you book it yourself in
+                one tap.
               </div>
             )}
 
             {/* Criteria */}
             <section className="mt-6">
-              <p className="eyebrow mb-2">Request</p>
+              <p className="eyebrow mb-2">Watch criteria</p>
               <div className="card-surface px-4 py-2">
                 <Leader label="Party size" value={formatPartySize(request.party_size)} />
                 <Leader label="Date" value={formatDateRange(request)} />
@@ -116,19 +127,13 @@ export function RequestDrawer() {
               )}
             </section>
 
-            {/* Connection + checks */}
+            {/* Monitoring */}
             <section className="mt-6">
               <p className="eyebrow mb-2">Monitoring</p>
               <div className="card-surface px-4 py-2">
                 <Leader
-                  label={<span className="inline-flex items-center gap-1"><PlatformLogo platform={request.platform} className="text-[13px]" /> connection</span>}
-                  value={
-                    connection?.status === "connected" ? (
-                      <span className="text-sage-600">Connected</span>
-                    ) : (
-                      <span className="text-clay-600">Not connected</span>
-                    )
-                  }
+                  label={<span className="inline-flex items-center gap-1">Watching on <PlatformLogo platform={request.platform} className="text-[13px]" /></span>}
+                  value={request.status === "active" ? <span className="text-sage-600">Active</span> : REQUEST_STATUS_META[request.status].label}
                 />
                 <Leader label="Last checked" value={formatRelative(request.last_checked_at)} />
                 <Leader label="Next check" value={request.next_check_at ? formatRelative(request.next_check_at) : "—"} />
@@ -150,11 +155,11 @@ export function RequestDrawer() {
               </section>
             )}
 
-            {/* Attempt timeline */}
+            {/* Check timeline */}
             <section className="mt-6">
-              <p className="eyebrow mb-3">Attempt timeline</p>
+              <p className="eyebrow mb-3">Check timeline</p>
               {timeline.length === 0 ? (
-                <p className="text-[13px] text-ink-400">No checks yet. We&apos;ll start as soon as it&apos;s active.</p>
+                <p className="text-[13px] text-ink-400">No checks yet. We&apos;ll start as soon as the watch is active.</p>
               ) : (
                 <ol className="relative ml-1.5 border-l border-line pl-5">
                   {timeline.map((a) => {
@@ -191,13 +196,9 @@ export function RequestDrawer() {
                 close();
               }}
               onDuplicate={() => duplicateRequest(request.id)}
-              onAddCredits={() => {
+              onUpgrade={() => {
                 close();
-                router.push("/credits");
-              }}
-              onConnect={() => {
-                close();
-                router.push("/connections");
+                router.push("/plan");
               }}
             />
           </footer>
@@ -214,8 +215,7 @@ function DrawerActions({
   onResume,
   onCancel,
   onDuplicate,
-  onAddCredits,
-  onConnect,
+  onUpgrade,
 }: {
   request: ReservationRequest;
   onEdit: () => void;
@@ -223,20 +223,18 @@ function DrawerActions({
   onResume: () => void;
   onCancel: () => void;
   onDuplicate: () => void;
-  onAddCredits: () => void;
-  onConnect: () => void;
+  onUpgrade: () => void;
 }) {
   const s = request.status;
   return (
     <div className="flex flex-wrap items-center gap-2">
-      {s === "needs_credits" && <Button onClick={onAddCredits}>Add credits</Button>}
-      {s === "needs_connection" && <Button onClick={onConnect}>Connect account</Button>}
+      {s === "needs_credits" && <Button onClick={onUpgrade}>Upgrade to start</Button>}
       {s === "active" && (
         <Button variant="secondary" onClick={onPause}>
           Pause
         </Button>
       )}
-      {(s === "paused" || s === "draft") && <Button onClick={onResume}>{s === "draft" ? "Activate" : "Resume"}</Button>}
+      {(s === "paused" || s === "draft") && <Button onClick={onResume}>{s === "draft" ? "Start watching" : "Resume"}</Button>}
       {s !== "booked" && s !== "canceled" && (
         <Button variant="ghost" onClick={onEdit}>
           Edit

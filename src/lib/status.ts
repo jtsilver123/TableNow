@@ -24,13 +24,13 @@ interface StatusMeta {
 
 export const REQUEST_STATUS_META: Record<RequestStatus, StatusMeta> = {
   draft: { label: "Draft", micro: "Saved as draft", tone: "neutral" },
-  active: { label: "Active", micro: "Searching", tone: "active" },
-  booked: { label: "Booked", micro: "Booked", tone: "success" },
-  needs_credits: { label: "Needs credits", micro: "Needs credits", tone: "warning" },
-  needs_connection: { label: "Needs connection", micro: "Needs connection", tone: "warning" },
+  active: { label: "Watching", micro: "Watching", tone: "active" },
+  booked: { label: "Table found", micro: "Table found — book now", tone: "success" },
+  needs_credits: { label: "Upgrade to watch", micro: "Upgrade to watch", tone: "warning" },
+  needs_connection: { label: "Paused", micro: "Paused", tone: "muted" },
   paused: { label: "Paused", micro: "Paused", tone: "muted" },
   expired: { label: "Expired", micro: "Expired", tone: "muted" },
-  failed: { label: "Failed", micro: "No credit used", tone: "muted" },
+  failed: { label: "Stopped", micro: "Stopped", tone: "muted" },
   canceled: { label: "Canceled", micro: "Canceled", tone: "muted" },
 };
 
@@ -53,12 +53,12 @@ export const TONE_DOT: Record<StatusTone, string> = {
 };
 
 export const ATTEMPT_STATUS_LABEL: Record<AttemptStatus, string> = {
-  checked_no_match: "No matching table",
-  match_found: "Found matching table",
-  booking_started: "Booking started",
-  booking_succeeded: "Booking succeeded",
-  booking_failed: "Booking failed — no credit used",
-  connection_failed: "Connection issue",
+  checked_no_match: "No table yet",
+  match_found: "Found a table — alert sent",
+  booking_started: "Checking",
+  booking_succeeded: "Found a table",
+  booking_failed: "No table yet",
+  connection_failed: "Check skipped",
   request_locked: "Already in progress",
   duplicate_prevented: "Duplicate prevented",
 };
@@ -93,8 +93,6 @@ export const STATUS_FILTER_ORDER: RequestStatus[] = [
   "active",
   "booked",
   "needs_credits",
-  "needs_connection",
   "paused",
   "expired",
-  "failed",
 ];

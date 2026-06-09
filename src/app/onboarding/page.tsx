@@ -7,22 +7,18 @@ import { Logo } from "@/components/ui/logo";
 import { Button } from "@/components/ui/button";
 import { Input, Label, Segmented, Select } from "@/components/ui/field";
 import { CheckIcon } from "@/components/icons";
-import { PlatformBadge, PlatformLogo } from "@/components/ui/platform-logo";
 import { RestaurantAutocomplete } from "@/components/restaurant-autocomplete";
-import { ConnectAccountModal } from "@/components/connections/connect-account-modal";
 import { cn } from "@/lib/cn";
-import { FREE_CREDIT_COPY } from "@/lib/credits";
 import { useStore } from "@/lib/store";
 import type { Platform, SeatingPreference } from "@/lib/types";
 
-const STEPS = ["Welcome", "City", "Connect", "Preferences", "First request"];
+const STEPS = ["Welcome", "City", "Preferences", "First watch"];
 
 export default function OnboardingPage() {
   const hydrated = useHydrated();
   const router = useRouter();
   const authed = useStore((s) => s.authed);
   const user = useStore((s) => s.user);
-  const connections = useStore((s) => s.connections);
   const completeOnboarding = useStore((s) => s.completeOnboarding);
   const updateUser = useStore((s) => s.updateUser);
   const createRequest = useStore((s) => s.createRequest);
@@ -35,7 +31,6 @@ export default function OnboardingPage() {
   const [seating, setSeating] = useState<SeatingPreference>("any");
   const [notify, setNotify] = useState(true);
   const [first, setFirst] = useState({ restaurant_name: "", platform: "resy" as Platform });
-  const [connectProvider, setConnectProvider] = useState<Platform | null>(null);
 
   useEffect(() => {
     if (hydrated && !authed) router.replace("/signup");
@@ -99,14 +94,15 @@ export default function OnboardingPage() {
 
       <main className="mx-auto max-w-xl px-5 py-10">
         {step === 0 && (
-          <Step title={`Welcome, ${user.name.split(" ")[0] || "there"}.`} subtitle={FREE_CREDIT_COPY}>
+          <Step title={`Welcome, ${user.name.split(" ")[0] || "there"}.`} subtitle="Watch the tables you want — we'll alert you the second one opens.">
             <div className="card-surface p-6">
               <p className="text-ink-600">
-                TableNow is your private dining concierge. Tell us the tables you want, and we&apos;ll
-                quietly watch availability and book the moment a match opens — using your own account.
+                TableNow watches Resy and OpenTable for the restaurants you want — with a far wider
+                net than their search allows — and alerts you the moment a table opens. You book it
+                yourself in one tap.
               </p>
               <ul className="mt-4 space-y-2 text-sm text-ink-600">
-                {["You hold credits — 1 per successful booking", "Your first successful booking is free", "No credit is used unless we book"].map((t) => (
+                {["Set a wider range than Resy or OpenTable allow", "Get alerted the second a table opens", "Book it in one tap on your own account"].map((t) => (
                   <li key={t} className="flex items-center gap-2">
                     <CheckIcon className="h-4 w-4 text-sage-600" /> {t}
                   </li>
@@ -118,7 +114,7 @@ export default function OnboardingPage() {
         )}
 
         {step === 1 && (
-          <Step title="Where do you dine?" subtitle="We'll default your requests to this city. You can change it any time.">
+          <Step title="Where do you dine?" subtitle="We'll default your watches to this city. You can change it any time.">
             <Label htmlFor="city">Default city</Label>
             <Select id="city" value={city} onChange={(e) => setCity(e.target.value)}>
               {["New York", "Los Angeles", "Chicago", "San Francisco", "Miami", "Austin", "Boston", "Washington DC"].map((c) => (
@@ -130,34 +126,7 @@ export default function OnboardingPage() {
         )}
 
         {step === 2 && (
-          <Step title="Connect your accounts" subtitle="We book using your own Resy or OpenTable profile — never a fake account.">
-            <div className="space-y-3">
-              {(["resy", "opentable"] as Platform[]).map((p) => {
-                const conn = connections.find((c) => c.provider === p);
-                const connected = conn?.status === "connected";
-                return (
-                  <div key={p} className="card-surface flex items-center justify-between p-4">
-                    <div className="flex items-center gap-3">
-                      <PlatformBadge platform={p} className={cn("h-10 w-10", !connected && "opacity-60")} />
-                      <div>
-                        <PlatformLogo platform={p} className="text-[15px]" />
-                        <p className="text-[12px] text-ink-400">{connected ? "Connected" : "Not connected"}</p>
-                      </div>
-                    </div>
-                    <Button variant={connected ? "secondary" : "primary"} size="sm" onClick={() => setConnectProvider(p)} disabled={connected}>
-                      {connected ? "Connected" : "Connect"}
-                    </Button>
-                  </div>
-                );
-              })}
-            </div>
-            <p className="mt-3 text-[12px] text-ink-400">You can connect later — requests for a platform stay as drafts until it&apos;s connected.</p>
-            <NavRow onBack={back} onNext={next} />
-          </Step>
-        )}
-
-        {step === 3 && (
-          <Step title="Set your defaults" subtitle="These pre-fill every new request. Optional, and changeable in Settings.">
+          <Step title="Set your defaults" subtitle="These pre-fill every new watch. Optional, and changeable in Settings.">
             <div className="space-y-5">
               <div>
                 <Label htmlFor="party">Default party size</Label>
@@ -200,8 +169,8 @@ export default function OnboardingPage() {
           </Step>
         )}
 
-        {step === 4 && (
-          <Step title="Create your first request" subtitle="Start with the table you want most. We'll begin watching right away.">
+        {step === 3 && (
+          <Step title="Create your first watch" subtitle="Start with the table you want most. We'll begin watching right away.">
             <div className="space-y-4">
               <div>
                 <Label htmlFor="r">Restaurant</Label>
@@ -225,7 +194,7 @@ export default function OnboardingPage() {
                 />
               </div>
               <p className="rounded-xl border border-sage-200 bg-sage-50 px-4 py-3 text-sm text-ink-700">
-                We&apos;ll automatically book a matching table if one opens. {FREE_CREDIT_COPY}
+                We&apos;ll alert you the moment a matching table opens — then you book it in one tap.
               </p>
             </div>
             <div className="mt-8 flex items-center justify-between">
@@ -238,8 +207,6 @@ export default function OnboardingPage() {
           </Step>
         )}
       </main>
-
-      <ConnectAccountModal provider={connectProvider} onClose={() => setConnectProvider(null)} />
     </div>
   );
 }

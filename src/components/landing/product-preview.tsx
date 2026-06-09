@@ -15,9 +15,9 @@ import {
  * presentational; mirrors the real dashboard layout.
  */
 const MINI_CARDS = [
-  { name: "Don Angie", hood: "West Village", platform: "resy" as const, meta: "2 guests · Fri · 7–9 PM", status: "Searching", tone: "active" as const },
-  { name: "Tatiana", hood: "Lincoln Center", platform: "resy" as const, meta: "2 guests · any night next week", status: "Searching", tone: "active" as const },
-  { name: "Carbone", hood: "Greenwich Village", platform: "resy" as const, meta: "2 guests · Sat · 8 PM", status: "Booked", tone: "success" as const },
+  { name: "Don Angie", hood: "West Village", platform: "resy" as const, meta: "2 guests · Fri · 7–9 PM", status: "Watching", tone: "active" as const },
+  { name: "Tatiana", hood: "Lincoln Center", platform: "resy" as const, meta: "2 guests · any night next week", status: "Watching", tone: "active" as const },
+  { name: "Carbone", hood: "Greenwich Village", platform: "resy" as const, meta: "2 guests · Sat · 8 PM", status: "Table found", tone: "success" as const },
 ];
 
 const NAV = [QueueIcon, CalendarIcon, CreditIcon, ConnectionIcon, SettingsIcon];
@@ -57,8 +57,8 @@ export function ProductPreview() {
         {/* Queue */}
         <div className="min-w-0 flex-1 p-4 sm:p-5">
           <div className="mb-3 flex items-center justify-between">
-            <p className="text-[11px] font-medium uppercase tracking-label text-sage-600">Auto-booking queue</p>
-            <span className="rounded-full bg-sage-100 px-2 py-0.5 text-[10px] font-medium text-sage-700">3 credits</span>
+            <p className="text-[11px] font-medium uppercase tracking-label text-sage-600">Your watches</p>
+            <span className="rounded-full bg-sage-100 px-2 py-0.5 text-[10px] font-medium text-sage-700">Premium</span>
           </div>
           <div className="space-y-2.5">
             {MINI_CARDS.map((c) => (
@@ -83,7 +83,9 @@ export function ProductPreview() {
                 </div>
                 <div className="mt-2 flex items-center justify-between border-t border-line pt-2">
                   <span className="text-[11px] text-ink-500">{c.meta}</span>
-                  <span className="text-[10px] text-ink-400">No credit used unless booked</span>
+                  <span className="text-[10px] text-ink-400">
+                    {c.tone === "success" ? "Tap to book on Resy" : "We'll alert you"}
+                  </span>
                 </div>
               </div>
             ))}
@@ -103,7 +105,7 @@ export function ProductPreview() {
               Book Don Angie for 2 next Friday after 7
             </div>
             <div className="w-fit max-w-[95%] rounded-xl rounded-bl-sm border border-line bg-ivory-50 px-2.5 py-1.5 text-[11px] text-ink-600">
-              Added — Don Angie, 2 guests, Fri 7–9 PM on Resy. Searching now.
+              Added — Don Angie, 2 guests, Fri 7–9 PM on Resy. Watching now.
             </div>
           </div>
         </aside>

@@ -13,6 +13,12 @@ export type SeatingPreference = "any" | "indoor" | "outdoor" | "bar" | "counter"
 
 export type Priority = "normal" | "high";
 
+/** Free vs Premium plan. */
+export type Plan = "free" | "premium";
+
+/** How many active watches a free member may run at once. */
+export const FREE_WATCH_LIMIT = 3;
+
 /** Lifecycle of an auto-booking request. */
 export type RequestStatus =
   | "draft"
@@ -36,7 +42,8 @@ export type AttemptStatus =
   | "request_locked"
   | "duplicate_prevented";
 
-export type BookingStatus = "confirmed" | "canceled" | "manual_review";
+/** A found opening is live ("found") until its slot passes ("expired"). */
+export type BookingStatus = "found" | "expired";
 
 export type CreditTransactionType =
   | "signup_bonus"
@@ -51,9 +58,7 @@ export interface User {
   id: string;
   name: string;
   email: string;
-  credit_balance: number;
-  free_credit_granted: boolean;
-  free_credit_used: boolean;
+  plan: Plan;
   default_city: string;
   default_party_size: number;
   created_at: string;
@@ -97,6 +102,10 @@ export interface ReservationRequest {
   updated_at: string;
 }
 
+/**
+ * A table our monitor found for the user. The product never books — it surfaces
+ * the opening with a deep link so the user grabs it themselves in one tap.
+ */
 export interface Booking {
   id: string;
   user_id: string;
@@ -106,10 +115,11 @@ export interface Booking {
   date: string;
   time: string;
   party_size: number;
-  confirmation_number: string;
+  /** One-tap deep link to the platform's booking page for this opening. */
+  book_url: string;
   status: BookingStatus;
-  credit_used: boolean;
-  booked_at: string;
+  /** When the opening was detected and the user alerted. */
+  found_at: string;
   created_at: string;
   updated_at: string;
 }
@@ -164,11 +174,38 @@ export interface AppNotification {
   created_at: string;
 }
 
-export const CREDIT_PACKAGES = [
-  { credits: 3, price: 60, label: "Taste" },
-  { credits: 10, price: 180, label: "Regular", popular: true },
-  { credits: 25, price: 400, label: "Connoisseur" },
-  { credits: 50, price: 700, label: "Patron" },
-] as const;
+export interface PlanTier {
+  id: Plan;
+  name: string;
+  price: number; // monthly, USD
+  tagline: string;
+  features: string[];
+}
 
-export type CreditPackage = (typeof CREDIT_PACKAGES)[number];
+export const PLANS: PlanTier[] = [
+  {
+    id: "free",
+    name: "Free",
+    price: 0,
+    tagline: "Start watching the tables you want most.",
+    features: [
+      `Up to ${FREE_WATCH_LIMIT} active table watches`,
+      "Email alerts the moment a table opens",
+      "One-tap link to book on Resy or OpenTable",
+      "Standard check frequency",
+    ],
+  },
+  {
+    id: "premium",
+    name: "Premium",
+    price: 19,
+    tagline: "For people who never want to miss the table.",
+    features: [
+      "Unlimited active watches",
+      "Priority, high-frequency checks",
+      "Widest flexibility — date ranges, multiple time windows",
+      "SMS alerts (coming soon)",
+      "Early access to new restaurants",
+    ],
+  },
+];

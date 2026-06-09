@@ -13,10 +13,9 @@ import { SimulationRunner } from "@/components/app/simulation-runner";
 import { useStore } from "@/lib/store";
 
 const TITLES: Record<string, string> = {
-  "/queue": "Queue",
+  "/queue": "Watches",
   "/calendar": "Calendar",
-  "/credits": "Credits",
-  "/connections": "Connections",
+  "/plan": "Plan",
   "/settings": "Settings",
 };
 

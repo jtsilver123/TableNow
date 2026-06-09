@@ -4,15 +4,14 @@ import { Leader } from "@/components/ui/leader";
 import { Logo } from "@/components/ui/logo";
 import { PlatformLogo } from "@/components/ui/platform-logo";
 import { ProductPreview } from "@/components/landing/product-preview";
-import { CREDIT_COPY } from "@/lib/credits";
+import { ALERT_COPY, VALUE_COPY } from "@/lib/plan";
 import type { Platform } from "@/lib/types";
 
 const HOW_IT_WORKS = [
-  { n: "01", title: "Create your request", body: "Tell us the restaurant, party size, and the nights that work." },
-  { n: "02", title: "Connect Resy or OpenTable", body: "We book using your own profile — never a fake account." },
-  { n: "03", title: "We monitor availability", body: "Our concierge watches the books quietly, around the clock." },
-  { n: "04", title: "We auto-book when a table opens", body: "The moment a matching table appears, it's yours." },
-  { n: "05", title: "You only use a credit when we succeed", body: "No table, no charge. It's that simple." },
+  { n: "01", title: "Set your watch", body: "Tell us the restaurant, party size, and a wide range of nights and times that work." },
+  { n: "02", title: "We watch the books", body: "We monitor Resy and OpenTable availability quietly, around the clock." },
+  { n: "03", title: "We alert you the second a table opens", body: "Email the instant a matching table appears — often before you'd ever catch it." },
+  { n: "04", title: "You book it in one tap", body: "Our alert links straight to the booking page. You confirm it yourself, on your own account." },
 ];
 
 const EXAMPLES: { name: string; platform: Platform; detail: string; hood: string }[] = [
@@ -31,9 +30,9 @@ export default function LandingPage() {
           <Logo />
           <nav className="hidden items-center gap-8 text-sm text-ink-600 md:flex">
             <a href="#how" className="transition hover:text-ink-900">How it works</a>
-            <a href="#credits" className="transition hover:text-ink-900">Credits</a>
+            <a href="#flexibility" className="transition hover:text-ink-900">Flexibility</a>
             <a href="#concierge" className="transition hover:text-ink-900">Concierge</a>
-            <a href="#trust" className="transition hover:text-ink-900">Trust</a>
+            <a href="#pricing" className="transition hover:text-ink-900">Pricing</a>
           </nav>
           <div className="flex items-center gap-2">
             <Link href="/login" className="hidden text-sm text-ink-600 transition hover:text-ink-900 sm:block">
@@ -47,19 +46,19 @@ export default function LandingPage() {
       {/* Hero */}
       <section className="relative overflow-hidden">
         <div className="mx-auto max-w-6xl px-5 pb-20 pt-20 text-center sm:px-8 sm:pt-28">
-          <p className="eyebrow mb-6 animate-fade-in">A private dining concierge</p>
+          <p className="eyebrow mb-6 animate-fade-in">Table availability alerts</p>
           <h1 className="mx-auto max-w-4xl text-display animate-fade-up">
-            Hard-to-get reservations, <span className="italic text-sage-600">handled.</span>
+            Be first to the <span className="italic text-sage-600">table.</span>
           </h1>
           <p className="mx-auto mt-7 max-w-2xl text-lg leading-relaxed text-ink-600">
-            Tell us where you want to go, connect your Resy or OpenTable account, and we&apos;ll
-            automatically book when a table opens. Your first successful reservation is free.
+            We watch Resy and OpenTable for the restaurants you want — with a far wider net than
+            their search allows — and alert you the moment a table opens. You book it in one tap.
           </p>
           <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row">
-            <LinkButton href="/signup" size="lg">Get your first booking free</LinkButton>
+            <LinkButton href="/signup" size="lg">Start watching free</LinkButton>
             <LinkButton href="#how" variant="secondary" size="lg">See how it works</LinkButton>
           </div>
-          <p className="mt-6 text-[13px] text-ink-400">{CREDIT_COPY}</p>
+          <p className="mt-6 text-[13px] text-ink-400">{ALERT_COPY}</p>
         </div>
 
         {/* Product preview — a look at the in-app queue */}
@@ -78,7 +77,7 @@ export default function LandingPage() {
         <div className="mx-auto max-w-6xl px-5 sm:px-8">
           <div className="mb-14 text-center">
             <p className="eyebrow mb-3">How it works</p>
-            <h2 className="text-4xl sm:text-5xl">Five quiet steps to the table</h2>
+            <h2 className="text-4xl sm:text-5xl">Four quiet steps to the table</h2>
           </div>
           <ol className="mx-auto max-w-3xl divide-y divide-line">
             {HOW_IT_WORKS.map((step) => (
@@ -95,27 +94,25 @@ export default function LandingPage() {
         <div className="h-24" />
       </section>
 
-      {/* Credits */}
-      <section id="credits" className="border-t border-line py-24">
+      {/* Flexibility — the core value prop */}
+      <section id="flexibility" className="border-t border-line py-24">
         <div className="mx-auto grid max-w-6xl items-center gap-12 px-5 sm:px-8 md:grid-cols-2">
           <div>
-            <p className="eyebrow mb-3">Credits</p>
-            <h2 className="text-4xl sm:text-5xl">One credit equals one successful reservation.</h2>
+            <p className="eyebrow mb-3">Flexibility</p>
+            <h2 className="text-4xl sm:text-5xl">Cast a far wider net.</h2>
             <p className="mt-5 max-w-md text-lg text-ink-600">
-              No subscriptions, no surprises. You hold credits, and we only ever spend one when a
-              table is confirmed in your name.
+              {VALUE_COPY} Resy and OpenTable make you pick one date, one time, one party size.
+              We watch the whole range at once — so you catch openings you&apos;d otherwise miss.
             </p>
-            <LinkButton href="/signup" className="mt-8">Start with a free booking</LinkButton>
+            <LinkButton href="/signup" className="mt-8">Start watching free</LinkButton>
           </div>
           <div className="card-surface p-7">
-            <p className="eyebrow mb-4">The rules, plainly</p>
-            <Leader label="New members" value="1 free credit" emphasis />
-            <Leader label="First booking" value="Always free" emphasis />
-            <Leader label="Failed attempt" value="0 credits" />
-            <Leader label="Paused or expired" value="0 credits" />
-            <Leader label="Successful booking" value="1 credit" emphasis />
-            <hr className="rule my-4" />
-            <p className="text-sm text-ink-500">{CREDIT_COPY}</p>
+            <p className="eyebrow mb-4">One watch can cover</p>
+            <Leader label="Dates" value="A full range, not one night" emphasis />
+            <Leader label="Times" value="6:00 – 9:30 PM, not one slot" emphasis />
+            <Leader label="Party size" value="2 or 3, whatever opens" />
+            <Leader label="Seating" value="Dining room, bar, or counter" />
+            <Leader label="Restaurants" value="As many as you like" emphasis />
           </div>
         </div>
       </section>
@@ -126,14 +123,14 @@ export default function LandingPage() {
           <p className="eyebrow mb-3">Concierge</p>
           <h2 className="text-4xl sm:text-5xl">Describe the table you want.</h2>
           <p className="mx-auto mt-5 max-w-xl text-lg text-ink-600">
-            We&apos;ll turn it into an auto-booking request. Just tell us in plain words.
+            We&apos;ll turn it into a watch. Just tell us in plain words.
           </p>
           <div className="mx-auto mt-10 max-w-lg space-y-3 text-left">
             <div className="ml-auto w-fit max-w-[85%] rounded-2xl rounded-br-sm bg-sage-500 px-4 py-2.5 text-sm text-ivory-50">
-              Book me Don Angie for 2 next Friday after 7.
+              Watch Don Angie for 2 next Friday after 7.
             </div>
             <div className="w-fit max-w-[90%] rounded-2xl rounded-bl-sm border border-line bg-ivory-50 px-4 py-3 text-sm text-ink-700 shadow-card">
-              Here&apos;s your request — <span className="font-medium text-ink-900">Don Angie, 2 guests, Friday 7:00–9:00 PM, on Resy.</span> Add it to your queue whenever you&apos;re ready.
+              Watching — <span className="font-medium text-ink-900">Don Angie, 2 guests, Friday 7:00–9:00 PM, on Resy.</span> I&apos;ll alert you the second a table opens.
             </div>
           </div>
         </div>
@@ -143,13 +140,13 @@ export default function LandingPage() {
       <section id="trust" className="border-t border-line py-24">
         <div className="mx-auto max-w-4xl px-5 text-center sm:px-8">
           <p className="eyebrow mb-3">Trust</p>
-          <h2 className="text-4xl sm:text-5xl">No resale. No fake accounts.</h2>
-          <p className="mt-4 text-xl text-ink-600">No credit used unless we book.</p>
+          <h2 className="text-4xl sm:text-5xl">You stay in control.</h2>
+          <p className="mt-4 text-xl text-ink-600">We alert. You book. Always.</p>
           <div className="mt-12 grid gap-px overflow-hidden rounded-2xl border border-line bg-line text-left sm:grid-cols-3">
             {[
-              { t: "Your own account", b: "We book using your connected Resy or OpenTable profile — never a fake one." },
-              { t: "Only what you ask", b: "We never book a reservation you didn't request, and you can pause anytime." },
-              { t: "Honest billing", b: "A credit is consumed only when a booking is confirmed. Every attempt is logged." },
+              { t: "We never book for you", b: "We only watch availability and notify you. You book on your own account, in one tap." },
+              { t: "No fake accounts, no resale", b: "We don't touch your login, never resell tables, and never act without you." },
+              { t: "Cancel anytime", b: "Pause or delete a watch whenever you like. Nothing happens you didn't ask for." },
             ].map((item) => (
               <div key={item.t} className="bg-ivory-50 p-6">
                 <h3 className="text-lg">{item.t}</h3>
@@ -160,11 +157,45 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* Pricing */}
+      <section id="pricing" className="border-t border-line bg-ivory-50/60 py-24">
+        <div className="mx-auto max-w-4xl px-5 sm:px-8">
+          <div className="mb-12 text-center">
+            <p className="eyebrow mb-3">Pricing</p>
+            <h2 className="text-4xl sm:text-5xl">Start free. Upgrade when you&apos;re hooked.</h2>
+          </div>
+          <div className="grid gap-5 sm:grid-cols-2">
+            <div className="card-surface p-7">
+              <p className="eyebrow mb-2">Free</p>
+              <p className="font-serif text-4xl text-ink-900">$0</p>
+              <hr className="rule my-5" />
+              <ul className="space-y-2.5 text-sm text-ink-600">
+                {["Up to 3 active watches", "Email alerts", "One-tap booking links", "Standard check frequency"].map((f) => (
+                  <li key={f}>· {f}</li>
+                ))}
+              </ul>
+              <LinkButton href="/signup" variant="secondary" className="mt-6 w-full">Start free</LinkButton>
+            </div>
+            <div className="card-surface p-7 ring-2 ring-sage-300">
+              <p className="eyebrow mb-2">Premium · $19/mo</p>
+              <p className="font-serif text-4xl text-ink-900">$19<span className="text-lg text-ink-400">/mo</span></p>
+              <hr className="rule my-5" />
+              <ul className="space-y-2.5 text-sm text-ink-600">
+                {["Unlimited watches", "Priority, high-frequency checks", "Widest flexibility", "SMS alerts (soon)"].map((f) => (
+                  <li key={f}>· {f}</li>
+                ))}
+              </ul>
+              <LinkButton href="/signup" className="mt-6 w-full">Go Premium</LinkButton>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Example requests */}
       <section className="border-t border-line bg-ivory-50/60 py-24">
         <div className="mx-auto max-w-6xl px-5 sm:px-8">
           <div className="mb-12 text-center">
-            <p className="eyebrow mb-3">Example requests</p>
+            <p className="eyebrow mb-3">Example watches</p>
             <h2 className="text-4xl sm:text-5xl">Tables our members are after</h2>
           </div>
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
@@ -182,7 +213,7 @@ export default function LandingPage() {
             ))}
           </div>
           <div className="mt-12 text-center">
-            <LinkButton href="/signup" size="lg">Get your first booking free</LinkButton>
+            <LinkButton href="/signup" size="lg">Start watching free</LinkButton>
           </div>
         </div>
       </section>
@@ -192,7 +223,7 @@ export default function LandingPage() {
         <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-6 px-5 sm:flex-row sm:px-8">
           <Logo />
           <p className="text-center text-sm text-ink-400">
-            A compliant reservation concierge. We never resell tables or create fake accounts.
+            Table availability alerts. We never book on your behalf — you stay in control.
           </p>
           <div className="flex gap-6 text-sm text-ink-500">
             <Link href="/login" className="transition hover:text-ink-900">Sign in</Link>

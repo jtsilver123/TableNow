@@ -2,8 +2,7 @@
 
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { getAdapter } from "./adapters";
-import { resolveActivation, runBookingCheck } from "./booking-workflow";
+import { resolveActivation, runWatchCheck } from "./booking-workflow";
 import {
   draftToRequestDefaults,
   parseConciergeMessage,
@@ -12,19 +11,16 @@ import {
 import {
   SEED_ATTEMPTS,
   SEED_BOOKINGS,
-  SEED_CONNECTIONS,
   SEED_REQUESTS,
-  SEED_TRANSACTIONS,
   SEED_USER,
 } from "./mock-data";
+import { FREE_WATCH_LIMIT } from "./types";
 import type {
   AppNotification,
   Booking,
   BookingAttempt,
   ConciergeMessage,
-  ConnectedAccount,
-  CreditTransaction,
-  Platform,
+  Plan,
   ReservationRequest,
   User,
 } from "./types";
@@ -32,10 +28,9 @@ import type {
 /**
  * Client-side application store.
  *
- * In production these mutations happen in Cloudflare Workers against D1, behind
- * a Durable Object lock (see workers/). For the MVP demo this store simulates
- * that backend in the browser so the entire product is explorable, while
- * reusing the exact same domain logic (booking-workflow, credits, adapters).
+ * Simulates the backend (watch monitoring + alerts) in the browser so the whole
+ * product is explorable, reusing the same domain logic (watch-workflow). The
+ * product watches availability and alerts; users book directly via deep links.
  */
 
 function uid(prefix: string): string {
@@ -55,27 +50,23 @@ interface AppState {
   onboarded: boolean;
 
   user: User;
-  connections: ConnectedAccount[];
   requests: ReservationRequest[];
   attempts: BookingAttempt[];
+  /** Tables our monitor found, each with a one-tap booking deep link. */
   bookings: Booking[];
-  transactions: CreditTransaction[];
   notifications: AppNotification[];
   conciergeMessages: ConciergeMessage[];
   conciergeDraft: ConciergeDraft | null;
 
   toasts: ToastMessage[];
 
-  // --- auth / onboarding ---
+  // auth / onboarding
   signup: (name: string, email: string) => void;
   login: () => void;
   logout: () => void;
-  completeOnboarding: (prefs: {
-    default_city: string;
-    default_party_size: number;
-  }) => void;
+  completeOnboarding: (prefs: { default_city: string; default_party_size: number }) => void;
 
-  // --- requests ---
+  // watches
   createRequest: (
     input: Partial<ReservationRequest>,
     activate: boolean,
@@ -87,28 +78,25 @@ interface AppState {
   cancelRequest: (id: string) => void;
   duplicateRequest: (id: string) => void;
 
-  // --- booking simulation (queue + cron stand-in) ---
+  // monitoring simulation
   runCheck: (id: string) => Promise<void>;
   runDueChecks: () => Promise<void>;
 
-  // --- credits ---
-  purchaseCredits: (credits: number, label: string) => void;
+  // plan
+  setPlan: (plan: Plan) => void;
 
-  // --- connections ---
-  connectAccount: (provider: Platform, accountLabel?: string) => void;
-  disconnectAccount: (provider: Platform) => void;
-  /** Re-run the platform adapter's validateConnection and refresh health. */
-  checkConnection: (provider: Platform) => Promise<void>;
-
-  // --- concierge ---
+  // concierge
   sendConcierge: (text: string) => void;
   clearConciergeDraft: () => void;
 
-  // --- settings ---
+  // settings
   updateUser: (patch: Partial<User>) => void;
   deleteAccount: () => void;
 
-  // --- toasts ---
+  // helpers
+  activeWatchCount: () => number;
+
+  // toasts
   pushToast: (tone: ToastMessage["tone"], text: string) => void;
   dismissToast: (id: string) => void;
 
@@ -121,9 +109,7 @@ function freshUser(name: string, email: string): User {
     id: uid("usr"),
     name,
     email,
-    credit_balance: 0,
-    free_credit_granted: true,
-    free_credit_used: false,
+    plan: "free",
     default_city: "New York",
     default_party_size: 2,
     created_at: iso,
@@ -133,11 +119,9 @@ function freshUser(name: string, email: string): User {
 
 const seedState = () => ({
   user: structuredClone(SEED_USER),
-  connections: structuredClone(SEED_CONNECTIONS),
   requests: structuredClone(SEED_REQUESTS),
   attempts: structuredClone(SEED_ATTEMPTS),
   bookings: structuredClone(SEED_BOOKINGS),
-  transactions: structuredClone(SEED_TRANSACTIONS),
   notifications: [] as AppNotification[],
   conciergeMessages: [] as ConciergeMessage[],
   conciergeDraft: null,
@@ -153,56 +137,20 @@ export const useStore = create<AppState>()(
       ...seedState(),
 
       signup: (name, email) => {
-        const user = freshUser(name, email);
-        const iso = nowIso();
         set({
           authed: true,
           onboarded: false,
-          user,
-          connections: [
-            {
-              id: uid("con"),
-              user_id: user.id,
-              provider: "resy",
-              status: "disconnected",
-              account_label: null,
-              last_checked_at: null,
-              created_at: iso,
-              updated_at: iso,
-            },
-            {
-              id: uid("con"),
-              user_id: user.id,
-              provider: "opentable",
-              status: "disconnected",
-              account_label: null,
-              last_checked_at: null,
-              created_at: iso,
-              updated_at: iso,
-            },
-          ],
+          user: freshUser(name, email),
           requests: [],
           attempts: [],
           bookings: [],
           notifications: [],
           conciergeMessages: [],
           conciergeDraft: null,
-          transactions: [
-            {
-              id: uid("ctx"),
-              user_id: user.id,
-              type: "signup_bonus",
-              amount: 1,
-              reason: "Welcome — your first booking is free",
-              booking_id: null,
-              created_at: iso,
-            },
-          ],
         });
       },
 
       login: () => {
-        // Demo login drops you into the seeded, returning-user experience.
         set({ authed: true, onboarded: true, ...seedState() });
       },
 
@@ -215,13 +163,15 @@ export const useStore = create<AppState>()(
         }));
       },
 
+      activeWatchCount: () => get().requests.filter((r) => r.status === "active").length,
+
       createRequest: (input, activate) => {
         const s = get();
         const iso = nowIso();
         const request: ReservationRequest = {
           id: uid("req"),
           user_id: s.user.id,
-          restaurant_name: input.restaurant_name ?? "Untitled request",
+          restaurant_name: input.restaurant_name ?? "Untitled watch",
           platform: input.platform ?? "resy",
           city: input.city ?? s.user.default_city,
           neighborhood: input.neighborhood,
@@ -234,7 +184,7 @@ export const useStore = create<AppState>()(
           seating_preference: input.seating_preference ?? "any",
           priority: input.priority ?? "normal",
           status: "draft",
-          credit_required: true,
+          credit_required: false,
           auto_book_enabled: false,
           notes: input.notes ?? "",
           expires_at: (input.date_end ?? input.date_start ?? null)
@@ -250,14 +200,13 @@ export const useStore = create<AppState>()(
         let message = "Saved as a draft.";
 
         if (activate) {
-          const conn = s.connections.find((c) => c.provider === request.platform);
-          const res = resolveActivation(request, s.user, conn);
+          const res = resolveActivation(s.user, get().activeWatchCount());
           request.status = res.status;
           request.auto_book_enabled = res.activated;
           if (res.activated) {
             request.next_check_at = new Date(Date.now() + 30_000).toISOString();
             activated = true;
-            message = "Request activated. We'll book the moment a table opens.";
+            message = "Watch started. We'll alert you the moment a table opens.";
           } else {
             message = res.reason ?? "Saved as a draft.";
           }
@@ -278,9 +227,8 @@ export const useStore = create<AppState>()(
       activateRequest: (id) => {
         const s = get();
         const request = s.requests.find((r) => r.id === id);
-        if (!request) return { activated: false, message: "Request not found." };
-        const conn = s.connections.find((c) => c.provider === request.platform);
-        const res = resolveActivation(request, s.user, conn);
+        if (!request) return { activated: false, message: "Watch not found." };
+        const res = resolveActivation(s.user, get().activeWatchCount());
         get().updateRequest(id, {
           status: res.status,
           auto_book_enabled: res.activated,
@@ -289,14 +237,14 @@ export const useStore = create<AppState>()(
         return {
           activated: res.activated,
           message: res.activated
-            ? "Request activated. We'll book the moment a table opens."
-            : res.reason ?? "Could not activate.",
+            ? "Watch started. We'll alert you the moment a table opens."
+            : res.reason ?? "Could not start watch.",
         };
       },
 
       pauseRequest: (id) => {
         get().updateRequest(id, { status: "paused", auto_book_enabled: false, next_check_at: null });
-        get().pushToast("info", "Request paused. No credits will be used.");
+        get().pushToast("info", "Watch paused.");
       },
 
       resumeRequest: (id) => {
@@ -306,7 +254,7 @@ export const useStore = create<AppState>()(
 
       cancelRequest: (id) => {
         get().updateRequest(id, { status: "canceled", auto_book_enabled: false, next_check_at: null });
-        get().pushToast("info", "Request canceled.");
+        get().pushToast("info", "Watch canceled.");
       },
 
       duplicateRequest: (id) => {
@@ -325,26 +273,19 @@ export const useStore = create<AppState>()(
           updated_at: iso,
         };
         set((st) => ({ requests: [copy, ...st.requests] }));
-        get().pushToast("info", "Request duplicated as a draft.");
+        get().pushToast("info", "Watch duplicated as a draft.");
       },
 
       runCheck: async (id) => {
         const s = get();
         const request = s.requests.find((r) => r.id === id);
         if (!request || request.status !== "active") return;
-        const connection = s.connections.find((c) => c.provider === request.platform);
-        const result = await runBookingCheck({ request, user: s.user, connection });
+        const result = await runWatchCheck({ request, user: s.user });
 
         set((st) => {
-          const requests = st.requests.map((r) =>
-            r.id === id ? { ...r, ...result.requestPatch } : r,
-          );
+          const requests = st.requests.map((r) => (r.id === id ? { ...r, ...result.requestPatch } : r));
           const attempts = [result.attempt, ...st.attempts];
           const bookings = result.booking ? [result.booking, ...st.bookings] : st.bookings;
-          const transactions = result.creditTransaction
-            ? [result.creditTransaction, ...st.transactions]
-            : st.transactions;
-          const user = result.userPatch ? { ...st.user, ...result.userPatch } : st.user;
           const notifications = result.notification
             ? [
                 {
@@ -360,17 +301,16 @@ export const useStore = create<AppState>()(
                 ...st.notifications,
               ]
             : st.notifications;
-          return { requests, attempts, bookings, transactions, user, notifications };
+          return { requests, attempts, bookings, notifications };
         });
 
         if (result.booking) {
-          get().pushToast("success", `Booked ${request.restaurant_name}! ${result.summary}`);
+          get().pushToast("success", `Table found at ${request.restaurant_name}! Tap to book.`);
         }
       },
 
       runDueChecks: async () => {
-        const s = get();
-        const due = s.requests.filter(
+        const due = get().requests.filter(
           (r) => r.status === "active" && r.next_check_at && new Date(r.next_check_at).getTime() <= Date.now(),
         );
         for (const r of due) {
@@ -379,87 +319,17 @@ export const useStore = create<AppState>()(
         }
       },
 
-      purchaseCredits: (credits, label) => {
-        set((s) => ({
-          user: { ...s.user, credit_balance: s.user.credit_balance + credits, updated_at: nowIso() },
-          transactions: [
-            {
-              id: uid("ctx"),
-              user_id: s.user.id,
-              type: "purchase",
-              amount: credits,
-              reason: `Credit package — ${label}`,
-              booking_id: null,
-              created_at: nowIso(),
-            },
-            ...s.transactions,
-          ],
-        }));
-        // Re-activate any requests that were only blocked on credits.
-        const blocked = get().requests.filter((r) => r.status === "needs_credits");
-        blocked.forEach((r) => get().activateRequest(r.id));
-        get().pushToast("success", `${credits} credits added.`);
-      },
-
-      connectAccount: (provider, accountLabel) => {
-        set((s) => ({
-          connections: s.connections.map((c) =>
-            c.provider === provider
-              ? {
-                  ...c,
-                  status: "connected",
-                  account_label: accountLabel ?? c.account_label ?? s.user.email,
-                  last_checked_at: nowIso(),
-                  updated_at: nowIso(),
-                }
-              : c,
-          ),
-        }));
-        // Re-activate any requests that were waiting on this connection.
-        const blocked = get().requests.filter(
-          (r) => r.status === "needs_connection" && r.platform === provider,
-        );
-        blocked.forEach((r) => get().activateRequest(r.id));
-        get().pushToast("success", `${provider === "resy" ? "Resy" : "OpenTable"} connected.`);
-      },
-
-      checkConnection: async (provider) => {
-        const adapter = getAdapter(provider);
-        const result = await adapter.validateConnection(get().user.id);
-        set((s) => ({
-          connections: s.connections.map((c) =>
-            c.provider === provider
-              ? {
-                  ...c,
-                  status: result.connected ? "connected" : "needs_reconnect",
-                  last_checked_at: nowIso(),
-                  updated_at: nowIso(),
-                }
-              : c,
-          ),
-        }));
-        const label = provider === "resy" ? "Resy" : "OpenTable";
-        get().pushToast(
-          result.connected ? "success" : "warning",
-          result.connected ? `${label} connection is healthy.` : `${label} needs to be reconnected.`,
-        );
-      },
-
-      disconnectAccount: (provider) => {
-        set((s) => ({
-          connections: s.connections.map((c) =>
-            c.provider === provider
-              ? { ...c, status: "disconnected", account_label: null, updated_at: nowIso() }
-              : c,
-          ),
-          // Active requests on this platform now need a connection.
-          requests: s.requests.map((r) =>
-            r.platform === provider && r.status === "active"
-              ? { ...r, status: "needs_connection", auto_book_enabled: false, next_check_at: null }
-              : r,
-          ),
-        }));
-        get().pushToast("warning", `${provider === "resy" ? "Resy" : "OpenTable"} disconnected.`);
+      setPlan: (plan) => {
+        set((s) => ({ user: { ...s.user, plan, updated_at: nowIso() } }));
+        if (plan === "premium") {
+          // Start any watches that were blocked by the free limit.
+          get()
+            .requests.filter((r) => r.status === "needs_credits")
+            .forEach((r) => get().activateRequest(r.id));
+          get().pushToast("success", "You're on Premium — unlimited watches unlocked.");
+        } else {
+          get().pushToast("info", "Switched to the Free plan.");
+        }
       },
 
       sendConcierge: (text) => {
@@ -489,7 +359,7 @@ export const useStore = create<AppState>()(
                 city: s.user.default_city,
                 party_size: s.user.default_party_size,
               });
-              reply = "Here's your request. Review and add it to your queue when ready.";
+              reply = "Here's your watch. Review and add it whenever you're ready.";
             }
             break;
           }
@@ -499,9 +369,9 @@ export const useStore = create<AppState>()(
             );
             if (target) {
               get().updateRequest(target.id, { flexibility_level: intent.flexibility });
-              reply = `Done — I widened the search for ${target.restaurant_name} to "very flexible". That improves your odds of a match.`;
+              reply = `Done — I widened the search for ${target.restaurant_name} to "very flexible". That catches more openings.`;
             } else {
-              reply = "Which request should I make more flexible?";
+              reply = "Which watch should I make more flexible?";
             }
             break;
           }
@@ -515,28 +385,25 @@ export const useStore = create<AppState>()(
             );
             targets.forEach((r) => get().pauseRequest(r.id));
             reply = targets.length
-              ? `Paused ${targets.length} request${targets.length === 1 ? "" : "s"}. No credits will be used while paused.`
-              : "I couldn't find a matching active request to pause.";
+              ? `Paused ${targets.length} watch${targets.length === 1 ? "" : "es"}.`
+              : "I couldn't find a matching active watch to pause.";
             break;
           }
           case "explain_credits": {
-            const need = s.requests.filter((r) => r.status === "needs_credits");
-            reply = need.length
-              ? `${need.length} request${need.length === 1 ? "" : "s"} need credits: ${need
-                  .map((r) => r.restaurant_name)
-                  .join(", ")}. You have ${s.user.credit_balance} credit${
-                  s.user.credit_balance === 1 ? "" : "s"
-                }. Remember — a credit is only used when we successfully book.`
-              : `You have ${s.user.credit_balance} credit${s.user.credit_balance === 1 ? "" : "s"} and nothing is blocked on credits right now.`;
-            break;
-          }
-          case "explain_status": {
-            reply = "Tell me which restaurant and I'll explain exactly where that request stands.";
+            const blocked = s.requests.filter((r) => r.status === "needs_credits");
+            reply =
+              s.user.plan === "premium"
+                ? "You're on Premium with unlimited watches — nothing is blocked."
+                : blocked.length
+                  ? `You're on Free (${FREE_WATCH_LIMIT} active watches). ${blocked.length} watch${
+                      blocked.length === 1 ? "" : "es"
+                    } need Premium to start. Upgrade for unlimited.`
+                  : `You're on Free — up to ${FREE_WATCH_LIMIT} active watches. Upgrade to Premium for unlimited.`;
             break;
           }
           default: {
             reply =
-              "I can create or edit auto-booking requests, make a request easier to get, pause requests, or check which need credits. Try: “Book Don Angie for 2 next Friday after 7.”";
+              "I can create or edit table watches, make a watch easier to catch, or pause watches. Try: “Watch Don Angie for 2 next Friday after 7.”";
           }
         }
 
@@ -557,8 +424,7 @@ export const useStore = create<AppState>()(
 
       clearConciergeDraft: () => set({ conciergeDraft: null }),
 
-      updateUser: (patch) =>
-        set((s) => ({ user: { ...s.user, ...patch, updated_at: nowIso() } })),
+      updateUser: (patch) => set((s) => ({ user: { ...s.user, ...patch, updated_at: nowIso() } })),
 
       deleteAccount: () => {
         set({ authed: false, onboarded: false, ...seedState() });

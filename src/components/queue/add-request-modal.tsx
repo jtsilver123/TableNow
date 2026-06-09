@@ -9,7 +9,7 @@ import {
   makeInitialValue,
   type RequestFormValue,
 } from "./request-form";
-import { canActivate, CREDIT_COPY, requiresCredit } from "@/lib/credits";
+import { ALERT_COPY, canStartWatch } from "@/lib/plan";
 import { useStore } from "@/lib/store";
 import { useUi } from "@/lib/ui-store";
 
@@ -20,6 +20,7 @@ export function AddRequestModal() {
   const close = useUi((s) => s.closeAddModal);
 
   const user = useStore((s) => s.user);
+  const activeCount = useStore((s) => s.requests.filter((r) => r.status === "active").length);
   const createRequest = useStore((s) => s.createRequest);
   const updateRequest = useStore((s) => s.updateRequest);
   const activateRequest = useStore((s) => s.activateRequest);
@@ -43,8 +44,7 @@ export function AddRequestModal() {
   }, [open, prefill]);
 
   const isEdit = Boolean(editId);
-  const needsCredit = requiresCredit(user);
-  const blockedOnCredits = needsCredit && !canActivate(user);
+  const atWatchLimit = !canStartWatch(user, activeCount);
   const valid = value.restaurant_name.trim().length > 0;
 
   function patch(p: Partial<RequestFormValue>) {
@@ -55,7 +55,7 @@ export function AddRequestModal() {
     if (!valid) return;
     if (isEdit && editId) {
       updateRequest(editId, value);
-      pushToast("info", "Request updated.");
+      pushToast("info", "Watch updated.");
     } else {
       createRequest(value, false);
       pushToast("info", "Saved as a draft.");
@@ -80,9 +80,11 @@ export function AddRequestModal() {
     <Modal
       open={open}
       onClose={close}
-      title={isEdit ? "Edit request" : "New auto-booking request"}
+      title={isEdit ? "Edit watch" : "New table watch"}
       subtitle={
-        isEdit ? "Update the details we use to find your table." : "We'll watch availability and book the moment a match opens."
+        isEdit
+          ? "Update the criteria we watch for."
+          : "Set your criteria — we'll alert you the moment a matching table opens."
       }
       className="max-w-xl"
     >
@@ -99,12 +101,12 @@ export function AddRequestModal() {
             <CheckIcon className="mt-0.5 h-5 w-5 flex-none text-sage-600" />
             <div>
               <p className="text-sm text-ink-800">
-                We&apos;ll automatically book a matching table if one opens.{" "}
-                <span className="font-medium">{CREDIT_COPY}</span>
+                <span className="font-medium">{ALERT_COPY}</span>
               </p>
-              {blockedOnCredits && (
+              {atWatchLimit && (
                 <p className="mt-2 text-sm text-clay-600">
-                  You can save this as a draft, but you need 1 credit to activate it.
+                  You can save this as a draft, but you&apos;ve reached your free watch limit —
+                  upgrade to Premium to start it.
                 </p>
               )}
             </div>
@@ -116,8 +118,8 @@ export function AddRequestModal() {
         <Button variant="secondary" onClick={handleSaveDraft} disabled={!valid}>
           Save draft
         </Button>
-        <Button onClick={handleActivate} disabled={!valid || blockedOnCredits} title={blockedOnCredits ? "Add a credit to activate" : undefined}>
-          {isEdit ? "Save & activate" : "Activate request"}
+        <Button onClick={handleActivate} disabled={!valid || atWatchLimit} title={atWatchLimit ? "Upgrade to start another watch" : undefined}>
+          {isEdit ? "Save & start" : "Start watching"}
         </Button>
       </footer>
     </Modal>

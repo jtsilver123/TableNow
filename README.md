@@ -1,13 +1,16 @@
 # TableNow
 
-**Hard-to-get reservations, handled.** A premium auto-booking concierge that
-monitors Resy and OpenTable and books a table the moment a match opens — using
-your own connected account. One credit equals one successful reservation, and a
-credit is only ever used when we successfully book.
+**Be first to the table.** A premium table-availability alert service that
+watches Resy and OpenTable for the restaurants you want — with a far wider net
+than their native search allows (date ranges, broad time windows, flexible
+party sizes) — and alerts you the moment a table opens. **You book it yourself
+in one tap** via a deep link to the platform's booking page.
 
-> Auto-booking only. No alerts-only mode, no resale, no fake accounts, no
-> marketplace. A compliant, platform-aware product that feels like a private
-> dining concierge.
+> Alert-and-notify only. We never book on your behalf, never touch your login,
+> never resell tables, and never create fake accounts. You stay in control.
+
+**Plans:** Free (up to 3 active watches) and Premium ($19/mo — unlimited
+watches, faster checks, widest flexibility).
 
 ---
 

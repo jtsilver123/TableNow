@@ -12,18 +12,18 @@ export function AuthShell({ children }: { children: React.ReactNode }) {
           <Logo />
         </Link>
         <div className="max-w-md">
-          <p className="eyebrow mb-4">Your private dining concierge</p>
+          <p className="eyebrow mb-4">Table availability alerts</p>
           <h1 className="text-4xl leading-tight lg:text-5xl">
-            The table you want, booked the moment it opens.
+            Be first to know the moment a table opens.
           </h1>
           <div className="mt-10 max-w-sm">
-            <Leader label="New members" value="1 free credit" emphasis />
-            <Leader label="First booking" value="Always free" emphasis />
-            <Leader label="Failed attempt" value="0 credits" />
+            <Leader label="Free plan" value="3 active watches" emphasis />
+            <Leader label="Alerts" value="The second a table opens" emphasis />
+            <Leader label="Booking" value="One tap, your account" />
           </div>
         </div>
         <p className="text-sm text-ink-400">
-          No resale. No fake accounts. No credit used unless we book.
+          We alert. You book. We never act on your account.
         </p>
       </div>
 

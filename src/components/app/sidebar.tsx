@@ -22,7 +22,7 @@ export function Sidebar() {
 
       <Button onClick={() => openAddModal()} size="sm" className="mt-7 w-full">
         <PlusIcon className="h-4 w-4" />
-        New request
+        New watch
       </Button>
 
       <nav className="mt-7 flex flex-col gap-1">
@@ -47,9 +47,9 @@ export function Sidebar() {
       </nav>
 
       <div className="mt-auto rounded-xl border border-line bg-ivory-50 p-4">
-        <p className="text-[13px] font-medium text-ink-800">First booking free</p>
+        <p className="text-[13px] font-medium text-ink-800">We watch, you book</p>
         <p className="mt-1 text-[12px] leading-relaxed text-ink-500">
-          A credit is only used when we successfully book your table.
+          We alert you the moment a table opens — then you book it in one tap.
         </p>
       </div>
     </aside>

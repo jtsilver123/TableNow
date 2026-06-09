@@ -23,7 +23,7 @@ const TONE_BAR: Record<StatusTone, string> = {
   neutral: "border border-line bg-ivory-100 text-ink-500",
 };
 
-const SHOWN_STATUSES = new Set(["active", "booked", "expired", "paused", "needs_connection", "needs_credits"]);
+const SHOWN_STATUSES = new Set(["active", "booked", "expired", "paused", "needs_credits"]);
 
 function isoDay(d: Date) {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
@@ -86,8 +86,8 @@ export default function CalendarPage() {
 
       {/* Legend */}
       <div className="mb-4 flex flex-wrap gap-x-5 gap-y-2 text-[12px] text-ink-500">
-        <Legend tone="success" label="Booked" />
-        <Legend tone="active" label="Active" />
+        <Legend tone="success" label="Table found" />
+        <Legend tone="active" label="Watching" />
         <Legend tone="warning" label="Needs action" />
         <Legend tone="muted" label="Expired / paused" />
       </div>

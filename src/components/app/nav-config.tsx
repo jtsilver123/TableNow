@@ -1,10 +1,4 @@
-import {
-  CalendarIcon,
-  ConnectionIcon,
-  CreditIcon,
-  QueueIcon,
-  SettingsIcon,
-} from "@/components/icons";
+import { CalendarIcon, CreditIcon, QueueIcon, SettingsIcon } from "@/components/icons";
 
 export interface NavItem {
   href: string;
@@ -13,9 +7,8 @@ export interface NavItem {
 }
 
 export const NAV_ITEMS: NavItem[] = [
-  { href: "/queue", label: "Queue", Icon: QueueIcon },
+  { href: "/queue", label: "Watches", Icon: QueueIcon },
   { href: "/calendar", label: "Calendar", Icon: CalendarIcon },
-  { href: "/credits", label: "Credits", Icon: CreditIcon },
-  { href: "/connections", label: "Connections", Icon: ConnectionIcon },
+  { href: "/plan", label: "Plan", Icon: CreditIcon },
   { href: "/settings", label: "Settings", Icon: SettingsIcon },
 ];

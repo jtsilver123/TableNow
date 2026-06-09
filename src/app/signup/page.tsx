@@ -25,9 +25,9 @@ export default function SignupPage() {
   return (
     <AuthShell>
       <p className="eyebrow mb-3">Create your account</p>
-      <h2 className="text-3xl">Your first booking is on us.</h2>
+      <h2 className="text-3xl">Start watching, free.</h2>
       <p className="mt-2 text-sm text-ink-500">
-        Sign up and receive 1 free credit — enough for your first successful reservation.
+        Set up to 3 table watches free and get alerted the moment one opens.
       </p>
 
       <div className="mt-8">
@@ -47,7 +47,7 @@ export default function SignupPage() {
           <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" />
         </div>
         <Button type="submit" size="lg" className="w-full">
-          Get your first booking free
+          Start watching free
         </Button>
       </form>
 
@@ -58,8 +58,8 @@ export default function SignupPage() {
         </Link>
       </p>
       <p className="mt-6 text-center text-[11px] leading-relaxed text-ink-400">
-        By continuing you agree to our compliant-use terms. We book only with your connected
-        account and never resell reservations.
+        By continuing you agree to our terms. We only watch availability and alert you — we never
+        book on your behalf or resell reservations.
       </p>
     </AuthShell>
   );

@@ -92,7 +92,7 @@ export default function SettingsPage() {
           ]}
         />
         <p className="mt-2 text-[12px] text-ink-400">
-          We&apos;ll email you on a successful booking, expiry, pause, low credits, or a connection issue.
+          We&apos;ll email you the moment a table opens, and when a watch expires or is paused.
         </p>
       </Section>
 
@@ -103,7 +103,7 @@ export default function SettingsPage() {
       {/* Billing + Legal */}
       <Section title="Billing & legal">
         <div className="divide-y divide-line">
-          <Row label="Credits & billing" action={<Link href="/credits" className="text-sm font-medium text-sage-600 hover:text-sage-700">Manage</Link>} />
+          <Row label="Plan & billing" action={<Link href="/plan" className="text-sm font-medium text-sage-600 hover:text-sage-700">Manage</Link>} />
           <Row label="Terms of service" action={<span className="text-sm text-ink-400">View</span>} />
           <Row label="Privacy policy" action={<span className="text-sm text-ink-400">View</span>} />
           <Row label="Compliant-use policy" action={<span className="text-sm text-ink-400">View</span>} />

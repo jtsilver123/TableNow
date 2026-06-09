@@ -18,9 +18,9 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "TableNow — Hard-to-get reservations, handled",
+  title: "TableNow — Be first to the table",
   description:
-    "Tell us where you want to go, connect your Resy or OpenTable account, and we'll automatically book when a table opens. Your first successful reservation is free.",
+    "We watch Resy and OpenTable for the restaurants you want — with a far wider net than their search allows — and alert you the moment a table opens. You book it in one tap.",
 };
 
 export const viewport: Viewport = {

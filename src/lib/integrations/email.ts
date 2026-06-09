@@ -20,30 +20,30 @@ export function notificationEmail(
   switch (type) {
     case "booking_success":
       return {
-        subject: `Booked: ${ctx.restaurant}`,
-        body: `Great news — we secured your table at ${ctx.restaurant}${
+        subject: `A table opened at ${ctx.restaurant}`,
+        body: `Good news — a table just opened at ${ctx.restaurant}${
           ctx.date ? ` on ${ctx.date}` : ""
-        }${ctx.time ? ` at ${ctx.time}` : ""}. Confirmation ${ctx.confirmation ?? ""}. A credit was used only because we booked.`,
+        }${ctx.time ? ` at ${ctx.time}` : ""}. Tap the link in the app to book it on your own account before it's gone.`,
       };
     case "request_expired":
       return {
-        subject: `Your ${ctx.restaurant ?? "reservation"} request expired`,
-        body: `We couldn't find a matching table before the window closed. No credit was used. You can duplicate the request to try again with broader criteria.`,
+        subject: `Your ${ctx.restaurant ?? "table"} watch expired`,
+        body: `We couldn't find a matching table before your window closed. You can duplicate the watch to try again with broader criteria.`,
       };
     case "request_paused":
       return {
-        subject: `Request paused`,
-        body: `Your ${ctx.restaurant ?? "reservation"} request is paused. We won't book or use any credits until you resume it.`,
+        subject: `Watch paused`,
+        body: `Your ${ctx.restaurant ?? "table"} watch is paused. We'll stop checking until you resume it.`,
       };
     case "needs_credits":
       return {
-        subject: `Add a credit to keep searching`,
-        body: `Your ${ctx.restaurant ?? "reservation"} request is ready to go but needs a credit to activate. Remember, a credit is only used when we successfully book.`,
+        subject: `Upgrade to start this watch`,
+        body: `Your ${ctx.restaurant ?? "table"} watch is ready, but you've reached your free watch limit. Upgrade to Premium for unlimited watches.`,
       };
     case "connection_issue":
       return {
-        subject: `Reconnect your account`,
-        body: `We hit a connection issue and paused your ${ctx.restaurant ?? "reservation"} request. Reconnect your account and we'll resume right away.`,
+        subject: `Watch needs attention`,
+        body: `We hit a snag checking your ${ctx.restaurant ?? "table"} watch. Open the app to take a look.`,
       };
   }
 }

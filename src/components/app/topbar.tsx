@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { Logo } from "@/components/ui/logo";
-import { CreditBadge } from "./credit-badge";
+import { PlanBadge } from "./plan-badge";
 import { useHydrated } from "@/components/hydrated";
 import { useStore } from "@/lib/store";
 
@@ -23,7 +23,7 @@ export function Topbar({ title }: { title: string }) {
       </div>
 
       <div className="flex items-center gap-3">
-        <CreditBadge />
+        <PlanBadge />
         <Link
           href="/settings"
           className="flex h-9 w-9 items-center justify-center rounded-full bg-sage-100 text-[12px] font-semibold text-sage-700 ring-1 ring-sage-200 transition hover:bg-sage-200 focus-ring"
