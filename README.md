@@ -61,8 +61,78 @@ demo store and the live Supabase backend run **identical rules**.
 `MockResyAdapter` and `MockOpenTableAdapter`. They simulate every scenario — no
 availability, a match, a successful booking, a failed booking, a disconnected
 account, an unavailable restaurant, and a time-window mismatch. The rest of the
-app never branches on Resy vs OpenTable, so approved real integrations can drop
-in later without touching the UI or the workflow.
+app never branches on Resy vs OpenTable.
+
+When `NEXT_PUBLIC_USE_LIVE_AVAILABILITY=true`, the registry swaps in
+`LiveAvailabilityAdapter`. It calls the authenticated
+`supabase/functions/check-availability` gateway, which keeps provider
+credentials off the static GitHub Pages frontend and normalizes live slots into
+the same adapter contract.
+
+## Live provider availability
+
+Live checks require a stable provider restaurant ID on every watch:
+
+- OpenTable: the restaurant RID supplied through the approved partner integration.
+- Resy: the venue ID supplied through an approved Resy partner integration.
+
+### OpenTable
+
+OpenTable provides a documented OAuth 2.0 partner API and a real-time Single
+Search Availability API. Production access requires OpenTable approval and a
+signed agreement. Once approved:
+
+1. Set the Edge Function secrets `OPENTABLE_CLIENT_ID`,
+   `OPENTABLE_CLIENT_SECRET`, and the partner-provided
+   `OPENTABLE_API_BASE_URL`.
+2. Optionally set `OPENTABLE_OAUTH_BASE_URL` and `OPENTABLE_REFERRAL_ID`.
+3. Add the restaurant RID when creating each live watch.
+
+See the [OpenTable API documentation](https://docs.opentable.com/) and
+[partner application](https://www.opentable.com/restaurant-solutions/api-partners/become-a-partner/).
+
+### Resy
+
+Resy does not publish a public diner availability API, and its terms prohibit
+automated crawling and scraping. TableNow therefore does not call
+reverse-engineered Resy endpoints. Configure `RESY_PARTNER_AVAILABILITY_URL`
+and, when required, `RESY_PARTNER_API_TOKEN` only after receiving an approved
+partner endpoint. That endpoint should accept the watch request and return the
+normalized `AvailabilityResult` shape from `src/lib/adapters/types.ts`.
+
+```json
+{
+  "available": true,
+  "slots": [
+    {
+      "date": "2026-06-12",
+      "time": "19:30",
+      "seating": "dining room",
+      "partySize": 2,
+      "bookUrl": "https://resy.com/..."
+    }
+  ],
+  "reason": "match_found"
+}
+```
+
+See [Resy's Terms of Service](https://resy.com/terms).
+
+### Deploy the gateway
+
+```bash
+supabase link --project-ref your-project-id
+supabase secrets set --env-file ./supabase/functions/.env
+supabase functions deploy check-availability
+```
+
+Then configure the GitHub repository variables
+`NEXT_PUBLIC_USE_SUPABASE=true`, `NEXT_PUBLIC_SUPABASE_URL`, and
+`NEXT_PUBLIC_USE_LIVE_AVAILABILITY=true`. Set `NEXT_PUBLIC_APP_URL` to the
+deployed site URL for OAuth redirects, and add the
+`NEXT_PUBLIC_SUPABASE_ANON_KEY` repository secret. Live calls require a signed-in
+Supabase user by default; `ALLOW_ANONYMOUS_AVAILABILITY=true` exists only for
+local testing.
 
 ## Going live (when you're ready — ~10 minutes of your time)
 
@@ -76,7 +146,9 @@ public. See [`.env.example`](.env.example) for every variable.
    one credit in a single transaction (no double-booking, no double-charge).
 2. **Vercel** — import the repo, add the same env vars, deploy.
 3. **Stripe** — add your keys + the four credit-package price IDs.
-4. **Resend** — add your API key and a verified from-address.
+4. **Live availability** — deploy `check-availability`, set approved provider
+   credentials, and enable `NEXT_PUBLIC_USE_LIVE_AVAILABILITY`.
+5. **Resend** — add your API key and a verified from-address.
 
 ## Trust & compliance
 

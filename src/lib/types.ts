@@ -81,6 +81,8 @@ export interface ReservationRequest {
   user_id: string;
   restaurant_name: string;
   platform: Platform;
+  /** Stable restaurant identifier supplied by the approved provider integration. */
+  provider_venue_id?: string;
   city: string;
   neighborhood?: string;
   party_size: number;

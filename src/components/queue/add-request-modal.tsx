@@ -10,6 +10,7 @@ import {
   type RequestFormValue,
 } from "./request-form";
 import { ALERT_COPY, canStartWatch } from "@/lib/plan";
+import { isLiveAvailabilityEnabled } from "@/lib/env";
 import { useStore } from "@/lib/store";
 import { useUi } from "@/lib/ui-store";
 
@@ -45,7 +46,9 @@ export function AddRequestModal() {
 
   const isEdit = Boolean(editId);
   const atWatchLimit = !canStartWatch(user, activeCount);
-  const valid = value.restaurant_name.trim().length > 0;
+  const valid =
+    value.restaurant_name.trim().length > 0 &&
+    (!isLiveAvailabilityEnabled || value.provider_venue_id.trim().length > 0);
 
   function patch(p: Partial<RequestFormValue>) {
     setValue((v) => ({ ...v, ...p }));

@@ -41,6 +41,13 @@ jobs:
         # so derive it from the repo name automatically.
         env:
           NEXT_PUBLIC_BASE_PATH: /${{ github.event.repository.name }}
+          NEXT_PUBLIC_USE_SUPABASE: ${{ vars.NEXT_PUBLIC_USE_SUPABASE }}
+          NEXT_PUBLIC_SUPABASE_URL: ${{ vars.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+          NEXT_PUBLIC_APP_URL: ${{ vars.NEXT_PUBLIC_APP_URL }}
+          NEXT_PUBLIC_USE_LIVE_AVAILABILITY: ${{ vars.NEXT_PUBLIC_USE_LIVE_AVAILABILITY }}
+          NEXT_PUBLIC_AVAILABILITY_API_URL: ${{ vars.NEXT_PUBLIC_AVAILABILITY_API_URL }}
+          NEXT_PUBLIC_AVAILABILITY_API_KEY: ${{ secrets.NEXT_PUBLIC_AVAILABILITY_API_KEY }}
         run: npm run build
 
       - name: Disable Jekyll processing

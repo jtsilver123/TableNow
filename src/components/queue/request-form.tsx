@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Input, Label, Segmented, Select, Textarea } from "@/components/ui/field";
 import { RestaurantAutocomplete } from "@/components/restaurant-autocomplete";
+import { isLiveAvailabilityEnabled } from "@/lib/env";
 import type {
   Flexibility,
   Platform,
@@ -14,6 +15,7 @@ import type {
 export interface RequestFormValue {
   restaurant_name: string;
   platform: Platform;
+  provider_venue_id: string;
   city: string;
   party_size: number;
   date_start: string;
@@ -35,6 +37,7 @@ export function makeInitialValue(
   return {
     restaurant_name: prefill?.restaurant_name ?? "",
     platform: prefill?.platform ?? "resy",
+    provider_venue_id: prefill?.provider_venue_id ?? "",
     city: prefill?.city ?? defaults.city,
     party_size: prefill?.party_size ?? defaults.party_size,
     date_start: prefill?.date_start ?? todayIso(),
@@ -67,17 +70,39 @@ export function RequestForm({
           value={value.restaurant_name}
           onChange={(v) => onChange({ restaurant_name: v })}
           onSelect={(entry) =>
-            onChange({ restaurant_name: entry.name, platform: entry.platform, city: entry.city })
+            onChange({
+              restaurant_name: entry.name,
+              platform: entry.platform,
+              provider_venue_id: "",
+              city: entry.city,
+            })
           }
         />
       </div>
+
+      {isLiveAvailabilityEnabled && (
+        <div>
+          <Label
+            htmlFor="provider-venue-id"
+            hint={value.platform === "opentable" ? "OpenTable RID" : "From your approved Resy integration"}
+          >
+            Restaurant connection ID
+          </Label>
+          <Input
+            id="provider-venue-id"
+            value={value.provider_venue_id}
+            onChange={(e) => onChange({ provider_venue_id: e.target.value })}
+            placeholder={value.platform === "opentable" ? "e.g. 123456" : "e.g. venue_123"}
+          />
+        </div>
+      )}
 
       <div className="grid grid-cols-2 gap-4">
         <div>
           <Label>Platform</Label>
           <Segmented
             value={value.platform}
-            onChange={(platform) => onChange({ platform })}
+            onChange={(platform) => onChange({ platform, provider_venue_id: "" })}
             options={[
               { value: "resy", label: "Resy" },
               { value: "opentable", label: "OpenTable" },
