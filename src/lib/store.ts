@@ -173,7 +173,6 @@ export const useStore = create<AppState>()(
           user_id: s.user.id,
           restaurant_name: input.restaurant_name ?? "Untitled watch",
           platform: input.platform ?? "resy",
-          provider_venue_id: input.provider_venue_id,
           city: input.city ?? s.user.default_city,
           neighborhood: input.neighborhood,
           party_size: input.party_size ?? s.user.default_party_size,

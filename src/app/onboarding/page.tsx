@@ -9,7 +9,6 @@ import { Input, Label, Segmented, Select } from "@/components/ui/field";
 import { CheckIcon } from "@/components/icons";
 import { RestaurantAutocomplete } from "@/components/restaurant-autocomplete";
 import { cn } from "@/lib/cn";
-import { isLiveAvailabilityEnabled } from "@/lib/env";
 import { useStore } from "@/lib/store";
 import type { Platform, SeatingPreference } from "@/lib/types";
 
@@ -31,11 +30,7 @@ export default function OnboardingPage() {
   const [window, setWindowPref] = useState({ start: "19:00", end: "21:00" });
   const [seating, setSeating] = useState<SeatingPreference>("any");
   const [notify, setNotify] = useState(true);
-  const [first, setFirst] = useState({
-    restaurant_name: "",
-    platform: "resy" as Platform,
-    provider_venue_id: "",
-  });
+  const [first, setFirst] = useState({ restaurant_name: "", platform: "resy" as Platform });
 
   useEffect(() => {
     if (hydrated && !authed) router.replace("/signup");
@@ -60,7 +55,6 @@ export default function OnboardingPage() {
         {
           restaurant_name: first.restaurant_name.trim(),
           platform: first.platform,
-          provider_venue_id: first.provider_venue_id.trim() || undefined,
           city,
           party_size: partySize,
           time_start: window.start,
@@ -185,41 +179,14 @@ export default function OnboardingPage() {
                   value={first.restaurant_name}
                   autoFocus
                   onChange={(v) => setFirst((f) => ({ ...f, restaurant_name: v }))}
-                  onSelect={(entry) =>
-                    setFirst((f) => ({
-                      ...f,
-                      restaurant_name: entry.name,
-                      platform: entry.platform,
-                      provider_venue_id: "",
-                    }))
-                  }
+                  onSelect={(entry) => setFirst((f) => ({ ...f, restaurant_name: entry.name, platform: entry.platform }))}
                 />
               </div>
-              {isLiveAvailabilityEnabled && (
-                <div>
-                  <Label
-                    htmlFor="provider-venue-id"
-                    hint={first.platform === "opentable" ? "OpenTable RID" : "From your approved Resy integration"}
-                  >
-                    Restaurant connection ID
-                  </Label>
-                  <Input
-                    id="provider-venue-id"
-                    value={first.provider_venue_id}
-                    onChange={(e) =>
-                      setFirst((f) => ({ ...f, provider_venue_id: e.target.value }))
-                    }
-                    placeholder={first.platform === "opentable" ? "e.g. 123456" : "e.g. venue_123"}
-                  />
-                </div>
-              )}
               <div>
                 <Label>Platform</Label>
                 <Segmented
                   value={first.platform}
-                  onChange={(platform) =>
-                    setFirst((f) => ({ ...f, platform, provider_venue_id: "" }))
-                  }
+                  onChange={(platform) => setFirst((f) => ({ ...f, platform }))}
                   options={[
                     { value: "resy", label: "Resy" },
                     { value: "opentable", label: "OpenTable" },
@@ -234,15 +201,7 @@ export default function OnboardingPage() {
               <button onClick={back} className="text-sm text-ink-500 hover:text-ink-800">Back</button>
               <div className="flex gap-2">
                 <Button variant="secondary" onClick={() => finish(false)}>Do this later</Button>
-                <Button
-                  onClick={() => finish(true)}
-                  disabled={
-                    !first.restaurant_name.trim() ||
-                    (isLiveAvailabilityEnabled && !first.provider_venue_id.trim())
-                  }
-                >
-                  Create &amp; finish
-                </Button>
+                <Button onClick={() => finish(true)} disabled={!first.restaurant_name.trim()}>Create &amp; finish</Button>
               </div>
             </div>
           </Step>

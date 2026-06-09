@@ -66,13 +66,6 @@ function makeAttempt(
 }
 
 function reasonToAttemptStatus(reason: AdapterReason | undefined): AttemptStatus {
-  if (
-    reason === "account_disconnected" ||
-    reason === "integration_unavailable" ||
-    reason === "invalid_request"
-  ) {
-    return "connection_failed";
-  }
   return reason === "match_found" ? "match_found" : "checked_no_match";
 }
 
@@ -104,24 +97,10 @@ export async function runWatchCheck(input: WatchCheckInput): Promise<WatchCheckR
   const availability = await adapter.searchAvailability(request);
 
   if (!availability.available) {
-    const attemptStatus = reasonToAttemptStatus(availability.reason);
-    const connectionFailed = attemptStatus === "connection_failed";
     return {
-      attempt: makeAttempt(
-        request,
-        attemptStatus,
-        iso,
-        availability.message,
-      ),
-      requestPatch: {
-        ...base,
-        status: connectionFailed ? "needs_connection" : "active",
-        next_check_at: connectionFailed ? null : nextCheck,
-      },
-      notification: connectionFailed ? { type: "connection_issue" } : undefined,
-      summary: connectionFailed
-        ? "Live availability needs attention. We paused this watch."
-        : "No table yet. Still watching.",
+      attempt: makeAttempt(request, reasonToAttemptStatus(availability.reason), iso),
+      requestPatch: { ...base, status: "active" },
+      summary: "No table yet. Still watching.",
     };
   }
 
@@ -136,16 +115,14 @@ export async function runWatchCheck(input: WatchCheckInput): Promise<WatchCheckR
     date: slot?.date ?? request.date_start,
     time: slot?.time ?? request.time_start,
     party_size: slot?.partySize ?? request.party_size,
-    book_url:
-      slot?.bookUrl ??
-      bookingDeepLink({
-        platform: request.platform,
-        restaurant_name: request.restaurant_name,
-        city: request.city,
-        party_size: slot?.partySize ?? request.party_size,
-        date_start: slot?.date ?? request.date_start,
-        time_start: slot?.time ?? request.time_start,
-      }),
+    book_url: bookingDeepLink({
+      platform: request.platform,
+      restaurant_name: request.restaurant_name,
+      city: request.city,
+      party_size: slot?.partySize ?? request.party_size,
+      date_start: slot?.date ?? request.date_start,
+      time_start: slot?.time ?? request.time_start,
+    }),
     status: "found",
     found_at: iso,
     created_at: iso,

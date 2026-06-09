@@ -15,8 +15,6 @@ export interface AvailabilityResult {
   slots: AvailabilitySlot[];
   /** Why nothing matched, for the attempt timeline. */
   reason?: AdapterReason;
-  /** Human-readable provider or configuration detail. */
-  message?: string;
 }
 
 export interface AvailabilitySlot {
@@ -24,8 +22,6 @@ export interface AvailabilitySlot {
   time: string; // HH:MM
   seating: string;
   partySize: number;
-  /** Exact provider booking URL when the live API returns one. */
-  bookUrl?: string;
 }
 
 export interface BookingResult {
@@ -53,9 +49,7 @@ export type AdapterReason =
   | "booking_failed"
   | "account_disconnected"
   | "restaurant_unavailable"
-  | "time_window_mismatch"
-  | "integration_unavailable"
-  | "invalid_request";
+  | "time_window_mismatch";
 
 export interface PlatformAdapter {
   readonly provider: Platform;

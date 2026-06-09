@@ -11,7 +11,6 @@ import { AddRequestModal } from "@/components/queue/add-request-modal";
 import { RequestDrawer } from "@/components/queue/request-drawer";
 import { SimulationRunner } from "@/components/app/simulation-runner";
 import { useStore } from "@/lib/store";
-import { getSupabase } from "@/lib/supabase/client";
 
 const TITLES: Record<string, string> = {
   "/queue": "Watches",
@@ -23,29 +22,13 @@ const TITLES: Record<string, string> = {
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const hydrated = useHydrated();
   const authed = useStore((s) => s.authed);
-  const login = useStore((s) => s.login);
   const router = useRouter();
   const pathname = usePathname();
   const title = TITLES[pathname] ?? "TableNow";
 
   useEffect(() => {
-    if (!hydrated || authed) return;
-    const supabase = getSupabase();
-    if (!supabase) {
-      router.replace("/login");
-      return;
-    }
-
-    let canceled = false;
-    void supabase.auth.getSession().then(({ data }) => {
-      if (canceled) return;
-      if (data.session) login();
-      else router.replace("/login");
-    });
-    return () => {
-      canceled = true;
-    };
-  }, [hydrated, authed, login, router]);
+    if (hydrated && !authed) router.replace("/login");
+  }, [hydrated, authed, router]);
 
   if (!hydrated || !authed) {
     return (

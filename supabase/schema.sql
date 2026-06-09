@@ -70,7 +70,6 @@ create table public.reservation_requests (
   user_id           uuid not null references public.users (id) on delete cascade,
   restaurant_name   text not null,
   platform          platform not null,
-  provider_venue_id text,
   city              text not null,
   neighborhood      text,
   party_size        integer not null check (party_size > 0),

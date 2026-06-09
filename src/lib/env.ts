@@ -13,18 +13,6 @@ export const env = {
   supabaseAnonKey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? "",
   appUrl: process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000",
   stripePublishableKey: process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY ?? "",
-  useLiveAvailability: process.env.NEXT_PUBLIC_USE_LIVE_AVAILABILITY === "true",
-  availabilityApiUrl:
-    process.env.NEXT_PUBLIC_AVAILABILITY_API_URL ??
-    (process.env.NEXT_PUBLIC_SUPABASE_URL
-      ? `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/check-availability`
-      : ""),
-  availabilityApiKey:
-    process.env.NEXT_PUBLIC_AVAILABILITY_API_KEY ??
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ??
-    "",
 };
 
 export const isSupabaseEnabled = env.useSupabase;
-export const isLiveAvailabilityEnabled =
-  env.useLiveAvailability && Boolean(env.availabilityApiUrl && env.availabilityApiKey);
